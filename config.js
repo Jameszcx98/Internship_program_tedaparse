@@ -1,6 +1,6 @@
 const Config = {
-	WechatAppID: 'wxd93c5bdc8a8d6d10',
-	WechatAppSecret: 'b76716bbc11e1f67e397354eb5a37010',
+	WechatAppID: 'wxd2fa273880446a03',
+	WechatAppSecret: 'bfce08513442850456e95674a482b039',
 
 	aliyun: {
 		OSSAccessKeyId: 'LTAIeuZ0sLZS7tsT',
