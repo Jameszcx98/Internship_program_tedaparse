@@ -34,7 +34,41 @@ module.exports = {
     let id = req.params.id;
     return await q.get('/categories/' + id + '/products').then();
   },
+  getFilteredProducts: async req => {
 
+    let builder = new QueryBuilder();
+    builder.addFilterGroup([//and关系
+      {
+        field: "price",
+        value: 40,
+        condition:'gt'//大于
+
+      }
+     
+    ])
+    builder.addFilterGroup([
+      {
+        field: "price",
+        value: 51,
+        condition:'lt'//小于
+      }
+    ])
+
+    let pageSize = 5//条目数
+    let currentPage = 1//当前页
+    let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&` + builder.getQuery()
+    return await q.get(url)
+  },
+  getAttbutesLabel: async req => {
+    return await q.get(`/products/attribute-sets/4/attributes`)
+  },
+
+  
+  getAllAttributeMenu:async req=>{
+    
+    let url='categories/attributes?searchCriteria[page_size]=5&searchCriteria[current_page]=1'
+    return await q.get(url)
+  },
   products: async req => {    // Get the detail info of products under the category
     let sku = req.params.sku
     return await q.get('/products/' + sku)
