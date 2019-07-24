@@ -4,6 +4,13 @@ let Question = Parse.Object.extend('Question')
 let Publish = Parse.Object.extend('Publish')
 let Review = Parse.Object.extend('Review')
 
+let OSS = require('ali-oss')
+let client = new OSS({
+    region: 'oss-us-east-1',
+    accessKeyId: 'LTAIeuZ0sLZS7tsT',
+    accessKeySecret: 'q5qgBsUVQzc9xF9NrhQuwzYCz5zGmI',
+    bucket: 'tedacar',
+});
 module.exports = {
 
     addEvent: async req => {
@@ -84,9 +91,20 @@ module.exports = {
             'comment': !!p.commentId ? Parse.Object.extend('Comment').createWithoutData(p.commentId): undefined
 
         }).save()
+
         return r
     },
+    deleteImgAliOSS: async req => {
 
+        let deleteFileName = req.params.fileName
+        console.log('deleteFileName'+JSON.stringify(deleteFileName))
+        let reg=new RegExp('http://tedacar.oss-us-east-1.aliyuncs.com/');
+        let deleteUrl=deleteFileName.replace(reg,"")
+        let result = await client.delete(deleteUrl);
+        console.log(result);
+    
+       return result
+},
 
     getComment: async req => {
         
@@ -124,31 +142,47 @@ module.exports = {
 
     postStatus : async req => {
         let p = req.params
-
-        
+        console.log('jhhjjj'+JSON.stringify(req.params))
         let userPointer = Parse.User.createWithoutData(req.user.id)
+
         let publish = new Publish()
+        console.log('nucn'+p.img)
         return await publish.set({
             title: p.title,
             desc: p.desc,
             user: userPointer,
-            image:p.image
+            image:p.img,
+        }).save()
+    },
+
+    testpostStatus : async req => {
+        let p = req.params
+        // let userPointer = Parse.User.createWithoutData(req.user.id)
+        let publish = new Publish()
+        return await publish.set({
+            title: p.title,
+            desc: p.desc,
+            // user: userPointer,
+            image:p.oosArr,
         }).save()
     },
 
     getStatus: async req => {
         let p = req.params
-        let r = await new Parse.Query('Publish').include('user').find()
+        let r = await new Parse.Query('Publish').include('user').limit(10).descending("createdAt").find()
+        // Query.skip(10);
         return r.map(x => x._toFullJSON())
     },
 
     getStatusDetail: async req => {
         let p = req.params
-        console.log(p.id + 1111)
+        console.log('jgkhkgkgg'+p.id + '1111')
         let r = await new Parse.Query('Publish').include('user').get(p.id)
-        console.log(r)
+        // r.image = "http://tedacar.oss-us-east-1.aliyuncs.com/" +r.image
+        console.log('ooooooo'+JSON.stringify(r))
         return r._toFullJSON()
     }
+
 
 
 

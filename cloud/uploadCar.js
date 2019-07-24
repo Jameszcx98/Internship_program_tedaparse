@@ -26,6 +26,7 @@ module.exports = {
 
         let name = p.plate
         
+        console.log("p.crashlevel:",p.crash)
         let carParams = {
             "product": { 
                 "attribute_set_id": 4,
@@ -71,6 +72,22 @@ module.exports = {
                         "attribute_code": "date",
                         "value": timestamp
                     },
+                    {
+                        "attribute_code": "crashlevel",
+                        "value": p.crash+23      //对齐后台dropdown的value
+                    },
+                    {
+                        "attribute_code": "scratchlevel",
+                        "value": p.appearance+26    //对齐后台dropdown的value
+                    },
+                    {
+                        "attribute_code": "burned",
+                        "value": p.burned
+                    },
+                    {
+                        "attribute_code": "soaked",
+                        "value": p.soaked
+                    }
 
 
                   ]
