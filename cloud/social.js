@@ -4,9 +4,11 @@ let Followee = Parse.Object.extend('Followee')
 
 module.exports = {
     follow : async req => { // 当别人关注我
-        let followeeId = req.params.followeeId  // 我
+       
+       
+        console.log('nvuhfu'+JSON.stringify(req))
         let meId = req.user.id
-
+        let followeeId = req.params.id  // 我
         let mePointer = Parse.User.createWithoutData(meId)
         let followeePointer = Parse.User.createWithoutData(followeeId)
 
