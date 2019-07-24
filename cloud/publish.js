@@ -86,7 +86,7 @@ module.exports = {
             [p.targetName]: targetPointer, // 键值为 target Name
             'desc': p.desc,
             'ifFather': !!p.commentId ? false : true,
- 
+            'targetId': p.targetId,
             'title': p.title || '',
             'comment': !!p.commentId ? Parse.Object.extend('Comment').createWithoutData(p.commentId): undefined
 
@@ -109,9 +109,12 @@ module.exports = {
     getComment: async req => {
         
         let p = req.params
+       
+        // console.log('xuus'+JSON.stringify(req))
+        console.log('nxjbius'+JSON.stringify(req.params))
 
         let userPointer = Parse.User.createWithoutData(req.user.id)
-
+        
         let q = new Parse.Query('Comment').descending('updatedAt')
 
         if (p.targetId) {
