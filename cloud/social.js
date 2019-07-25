@@ -64,10 +64,8 @@ module.exports = {
         let p = req.params
         let target = p.name    //
         let id = p.id
-
         let targetPointer = Parse.Object.extend(target).createWithoutData(id)
         let userPointer = Parse.User.createWithoutData(req.user.id)
-
         let check_doublelike = await new Parse.Query('Like').equalTo('userId', userPointer).equalTo('targetId', targetPointer).find()
         if (check_doublelike.length == 0) {
             let like = new Like()
@@ -76,37 +74,24 @@ module.exports = {
                 targetId: targetPointer,
                 targetName: target
             }).save().then()
-
             targetPointer.increment('like').save()
-
-            console.log('targetPointer')
-            console.log(targetPointer.get('user'))
-            console.log('targetPointer')
-
-
-            let targetuseridPionter = targetPointer.get('user')
-
-            console.log('targetuseridPionter')
-            console.log(targetuseridPionter)
-            console.log('targetuseridPionter')
-
-            let userinfo = await new Parse.Query('UserInfo').equalTo('userId', targetuseridPionter).find()
+            let targetlike = await new Parse.Query('Publish').get(id)
+            let targetuseridPionter= targetlike.get('user')
+            let userinfo = await new Parse.Query('UserInfo').equalTo('user', targetuseridPionter).find()
+            console.log('fsdat'+userinfo.length)
             if (userinfo.length == 0) {
                 let newuserinfo = new UserInfo()
                 await newuserinfo.set({
-                    user: targetuseridPionter,
-                    like: 1,
-                }).save().then()
+                    'user': targetuseridPionter,
+                    'like': 1,
+                }).save()   
             } else {
                 targetuserinfoPointer = Parse.Object.extend('UserInfo').createWithoutData(userinfo[0].id)
                 targetuserinfoPointer.increment('like').save()
             }
             let q = await new Parse.Query(target).get(p.id)
-
             return q._toFullJSON()
         }
-
-
         },
 
         followerNumber: async req => {
