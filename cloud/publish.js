@@ -3,6 +3,7 @@ let Comment = Parse.Object.extend('Comment')
 let Question = Parse.Object.extend('Question')
 let Publish = Parse.Object.extend('Publish')
 let Review = Parse.Object.extend('Review')
+let Like = Parse.Object.extend('Like')
 
 let OSS = require('ali-oss')
 let client = new OSS({
@@ -17,14 +18,24 @@ module.exports = {
         console.log('req' + JSON.stringify(req))
     },
 
-    addLike: async req => { // 为了防止用户重复点赞，可以使用一个表记录用户的最近的操作，如果已经点赞，就不显示。
-        let p = req.params
-        let target = p.targetName
-        let id = p.targetId
-        let targetPointer = Parse.Object.extend(target).createWithoutData(id)
-        return targetPointer.increment('like').save().then()
-    },
-
+    // addLike: async req => { // 为了防止用户重复点赞，可以使用一个表记录用户的最近的操作，如果已经点赞，就不显示。
+    //     let p = req.params
+    //     console.log('vgggg'+JSON.stringify(p))
+    //     let target = p.name
+    //     let id = p.id
+    //     let targetid= Parse.Object.extend(target).createWithoutData(id)
+    //     let userid = Parse.User.createWithoutData(req.user.id)
+    //     let like = new Like()
+    //     let r = await like.set({
+    //         Id:userid,
+    //         targetId:id,
+    //         targetName:target
+    //     }).save().then()
+    //     let targetlist = await Parse.Query(target)
+    //     .extend(target).increment('like').save().then()
+    //     return r
+    // },
+    
     postQuestion: async req => { // 
         let q = req.params
         let question = new Question()
@@ -173,8 +184,27 @@ module.exports = {
     getStatus: async req => {
         let p = req.params
         let r = await new Parse.Query('Publish').include('user').limit(10).descending("createdAt").find()
-        // Query.skip(10);
-        return r.map(x => x._toFullJSON())
+        let q=  await new Parse.Query('Publish').descending("createdAt").limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]  
+            return y
+        })
     },
 
     getStatusDetail: async req => {
