@@ -12,9 +12,10 @@ module.exports = {
     follow: async req => { // 当别人关注我
 
 
-        console.log('nvuhfu' + JSON.stringify(req))
+        
         let meId = req.user.id
         let followingId = req.params.id  // 我关注的id
+        if(meId!=followingId){
         let mePointer = Parse.User.createWithoutData(meId)
         let followingPointer = Parse.User.createWithoutData(followingId)
 
@@ -23,23 +24,47 @@ module.exports = {
 
         let r = await Parse.Object.saveAll([ // 生成两个记录
             follower.set({
-                user: followeePointer,
+                user: followingPointer,
                 follower: mePointer
             }),
-
-            mePointer.increment('following'),
-
-            followingPointer.increment('follower'),
-
-            followee.set({
+            following.set({
                 user: mePointer,
-                followee: followeePointer
+                following: followingPointer
             })
-        ], { useMasterKey: true }).then()
+        ]).then()
+        
 
-
-
+        let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
+        let targetInfo = await new Parse.Query('UserInfo').equalTo('user',followingPointer).find()
+        if(meInfo.length==0){
+            let newInfo = new UserInfo()
+            await newInfo.set({
+                user:mePointer,
+                like:0,
+                follower:0,
+                following:1,
+                
+            }).save()
+        }else {
+            meInfo[0].increment('following').save()
+        }
+        if(targetInfo == 0){
+            let newInfo = new UserInfo()
+            await newInfo.set({
+                user:followingPointer,
+                like:0,
+                follower:1,
+                following:0
+            }).save()  
+        }else{
+            targetInfo[0].increment('follower').save()
+        }
         return r
+        }else{
+            return false
+        }
+
+
     },
 
 
@@ -84,6 +109,8 @@ module.exports = {
                 await newuserinfo.set({
                     'user': targetuseridPionter,
                     'like': 1,
+                    'fowllower':0,
+                    'following':0,
                 }).save()   
             } else {
                 targetuserinfoPointer = Parse.Object.extend('UserInfo').createWithoutData(userinfo[0].id)
@@ -94,10 +121,7 @@ module.exports = {
         }
         },
 
-        followerNumber: async req => {
-            p = req.params
-
-        }
+       
 
 
 
