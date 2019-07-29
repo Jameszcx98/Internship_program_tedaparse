@@ -10,6 +10,7 @@ let social = require('./social')
 let wechat = require('./wechat')
 let yuansferPay = require('./yuansferPay')
 let aliyun = require('./aliyun')
+let myInfo = require('./myInfo')
 
 // const axios = require('axios')
 let uploadCar = require('./uploadCar')
@@ -43,6 +44,9 @@ for (x in yuansferPay) {
 }
 for (x in uploadCar) {                            
     Parse.Cloud.define(x, uploadCar[x])          //引入uploadCar
+}
+for (x in myInfo) {
+    Parse.Cloud.define(x, myInfo[x])
 }
 
 
