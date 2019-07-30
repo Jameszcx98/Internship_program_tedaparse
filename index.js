@@ -42,12 +42,16 @@ var api = new ParseServer({
   masterKey: process.env.MASTER_KEY || MASTER_KEY, //Add your master key here. Keep it secret!
   serverURL: process.env.SERVER_URL || SERVER_URL,  // Don't forget to change to https if needed
   liveQuery: {
-    classNames: ["Posts", "Comments"] // List of classes to support for query subscriptions
+    classNames: ["Conversations"] // List of classes to support for query subscriptions
   }
 });
+
+
+
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
+
 
 
 var Parse = require('parse/node')
@@ -95,3 +99,24 @@ httpServer.listen(port, function() {
 
 // This will enable the Live Query real-time server
 ParseServer.createLiveQueryServer(httpServer);
+
+
+
+// Firebase import
+// Google firebase package
+var firebase = require("firebase/app");
+
+// Add the Firebase products that you want to use
+require("firebase/firestore");
+
+
+const firebase_config = {
+  apiKey: "AIzaSyCaAt2jDPaPALCLN9bIn07RD3LzCFqPdT8",
+  authDomain: "chat-vue-c92b2.firebaseapp.com",
+  databaseURL: "https://chat-vue-c92b2.firebaseio.com",
+  projectId: "chat-vue-c92b2",
+  storageBucket: "",
+  messagingSenderId: "505504455007"
+};
+
+firebase.initializeApp(firebase_config)
