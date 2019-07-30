@@ -1,0 +1,29 @@
+{
+  "apps": [
+    {
+      "name": "parse",
+      "script": "/home/parse/index.js", // CHANGE THIS
+      "watch": true,
+      "merge_logs": true,
+      "ignore_watch" : ["node_modules", "logs"],
+      "cwd": "/home/parse"
+      // "env": {
+      //   "CLOUD_CODE_MAIN": "/www/wwwroot/billax.com.au/cloud/main.js",
+      //   "DATABASE_URI": "mongodb://USER:PASSWORD@SOMAIN:27017/DB-NAME?ssl=true",
+      //   "APPLICATION_ID": "APP_KEY",
+      //   "MASTER_KEY": "MASTER_KEY"
+      // }
+    }
+    // ,
+    // {
+    //   "name"   : "parse-dashboard",
+    //   "script" : "/usr/bin/parse-dashboard",
+    //   "watch"   : true,
+    //   "merge_logs"  : true,
+    //   "cwd"      : "/www/wwwroot/dashboard.billax.com.au/",
+    //   "args"     : "--config /www/wwwroot/dashboard.billax.com.au/dash.json --allowInsecureHTTP=1"
+    // }
+  ]
+}
+
+
