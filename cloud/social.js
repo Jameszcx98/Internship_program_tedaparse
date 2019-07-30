@@ -140,22 +140,20 @@ module.exports = {
                 targetName: targetname
             }).save().then()
             targetPointer.increment('favor').save()
-            let targetFavor = await new Parse.Query('Publish').get(id)
-            let targetuseridPionter= targetFavor.get('user')
-            let userinfo = await new Parse.Query('UserInfo').equalTo('user', targetuseridPionter).find()
+            let userinfo = await new Parse.Query('UserInfo').equalTo('user', userPointer).find()
             console.log('fsdat'+userinfo.length)
             if (userinfo.length == 0) {
                 let newuserinfo = new UserInfo()
                 await newuserinfo.set({
-                    'user': targetuseridPionter,
+                    'user': userPointer,
                     'like': 0,
                     'favor':1,
                     'fowllower':0,
                     'following':0,
                 }).save()   
             } else {
-                targetuserinfoPointer = Parse.Object.extend('UserInfo').createWithoutData(userinfo[0].id)
-                targetuserinfoPointer.increment('favor').save()
+                userinfoPointer = Parse.Object.extend('UserInfo').createWithoutData(userinfo[0].id)
+                userinfoPointer.increment('favor').save()
             }
             let q = await new Parse.Query('Publish').get(id)
             return q._toFullJSON()

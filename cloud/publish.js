@@ -186,8 +186,9 @@ module.exports = {
 
     getStatus: async req => {
         let skipnumber = req.params.number
-        if(skipnumber==null)
+        if(skipnumber==null){
         skipnumber = 0
+        }
         console.log('grggrfdf'+skipnumber)
         let user = Parse.User.createWithoutData(req.user.id)
         let followingList = await new Parse.Query('Following').equalTo('user',user).find()
@@ -195,6 +196,9 @@ module.exports = {
             y = x._toFullJSON()
             return y.following
         })
+        let maxlist = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").find()
+        console.log('dfassafd'+maxlist.length)
+        if(maxlist.length>skipnumber){
         let r = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").skip(skipnumber).limit(10).find()
         let q=  await new Parse.Query('Publish').containedIn('user',followinguserList).descending("createdAt").skip(skipnumber).limit(10).find()
         let promises = q.map(x => {
@@ -233,15 +237,21 @@ module.exports = {
             y.redfavor = favor[index]
             return y
         })
+    }else{
+        return;
+    }
     
     },
 
     getStatushot:async req =>{
         let skipnumber = req.params.number
-        if(skipnumber==null)
+        if(skipnumber==null){
         skipnumber = 0
-        let r = await new Parse.Query('Publish').include('user').skip(skipnumber).limit(10).descending("like").descending("createdAt").find()
-        let q=  await new Parse.Query('Publish').descending("like").descending("createdAt").skip(skipnumber).limit(10).find()
+        }
+        let maxlist = await new Parse.Query('Publish').include('user').descending("like").find()
+        if(maxlist.length>skipnumber){
+        let r = await new Parse.Query('Publish').include('user').skip(skipnumber).limit(10).descending("like").find()
+        let q=  await new Parse.Query('Publish').descending("like").skip(skipnumber).limit(10).find()
         let promises = q.map(x => {
             targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
             userId = Parse.User.createWithoutData(req.user.id)
@@ -278,14 +288,21 @@ module.exports = {
             y.redfavor = favor[index]
             return y
         })
+    }
+    else{
+        return;
+    }
 
     },
     getStatusme:async req =>{
         let skipnumber = req.params.number
-        if(skipnumber==null)
+        if(skipnumber==null){
         skipnumber = 0
+        }
         console.log('aaretatfd'+typeof(skipnumber))
         let user = Parse.User.createWithoutData(req.user.id)
+        let maxlist = await new Parse.Query('Publish').equalTo('user',user).include('user').descending("createdAt").find()
+        if(maxlist.length>skipnumber){
         let r = await new Parse.Query('Publish').equalTo('user',user).include('user').skip(skipnumber).limit(10).descending("createdAt").find()
         let q=  await new Parse.Query('Publish').equalTo('user',user).descending("createdAt").skip(skipnumber).limit(10).find()
         let promises = q.map(x => {
@@ -324,6 +341,9 @@ module.exports = {
             y.redfavor = favor[index]  
             return y
         })
+    }else{
+        return;
+    }
 
     },
     getStatusDetail: async req => {
