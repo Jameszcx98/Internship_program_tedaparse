@@ -3,21 +3,40 @@ let Comment = Parse.Object.extend('Comment')
 let Question = Parse.Object.extend('Question')
 let Publish = Parse.Object.extend('Publish')
 let Review = Parse.Object.extend('Review')
+let Like = Parse.Object.extend('Like')
+let Favor = Parse.Object.extend('Favor')
 
+let OSS = require('ali-oss')
+let client = new OSS({
+    region: 'oss-us-east-1',
+    accessKeyId: 'LTAIeuZ0sLZS7tsT',
+    accessKeySecret: 'q5qgBsUVQzc9xF9NrhQuwzYCz5zGmI',
+    bucket: 'tedacar',
+});
 module.exports = {
 
     addEvent: async req => {
         console.log('req' + JSON.stringify(req))
     },
 
-    addLike: async req => { // 为了防止用户重复点赞，可以使用一个表记录用户的最近的操作，如果已经点赞，就不显示。
-        let p = req.params
-        let target = p.targetName
-        let id = p.targetId
-        let targetPointer = Parse.Object.extend(target).createWithoutData(id)
-        return targetPointer.increment('like').save().then()
-    },
-
+    // addLike: async req => { // 为了防止用户重复点赞，可以使用一个表记录用户的最近的操作，如果已经点赞，就不显示。
+    //     let p = req.params
+    //     console.log('vgggg'+JSON.stringify(p))
+    //     let target = p.name
+    //     let id = p.id
+    //     let targetid= Parse.Object.extend(target).createWithoutData(id)
+    //     let userid = Parse.User.createWithoutData(req.user.id)
+    //     let like = new Like()
+    //     let r = await like.set({
+    //         Id:userid,
+    //         targetId:id,
+    //         targetName:target
+    //     }).save().then()
+    //     let targetlist = await Parse.Query(target)
+    //     .extend(target).increment('like').save().then()
+    //     return r
+    // },
+    
     postQuestion: async req => { // 
         let q = req.params
         let question = new Question()
@@ -79,21 +98,35 @@ module.exports = {
             [p.targetName]: targetPointer, // 键值为 target Name
             'desc': p.desc,
             'ifFather': !!p.commentId ? false : true,
- 
+            'targetId': p.targetId,
             'title': p.title || '',
             'comment': !!p.commentId ? Parse.Object.extend('Comment').createWithoutData(p.commentId): undefined
 
         }).save()
+
         return r
     },
+    deleteImgAliOSS: async req => {
 
+        let deleteFileName = req.params.fileName
+        console.log('deleteFileName'+JSON.stringify(deleteFileName))
+        let reg=new RegExp('http://tedacar.oss-us-east-1.aliyuncs.com/');
+        let deleteUrl=deleteFileName.replace(reg,"")
+        let result = await client.delete(deleteUrl);
+        console.log(result);
+    
+       return result
+},
 
     getComment: async req => {
         
         let p = req.params
+       
+        // console.log('xuus'+JSON.stringify(req))
+        console.log('nxjbius'+JSON.stringify(req.params))
 
         let userPointer = Parse.User.createWithoutData(req.user.id)
-
+        
         let q = new Parse.Query('Comment').descending('updatedAt')
 
         if (p.targetId) {
@@ -124,31 +157,184 @@ module.exports = {
 
     postStatus : async req => {
         let p = req.params
-
-        
+        console.log('jhhjjj'+JSON.stringify(req.params))
         let userPointer = Parse.User.createWithoutData(req.user.id)
+
         let publish = new Publish()
+        console.log('nucn'+p.img)
         return await publish.set({
             title: p.title,
             desc: p.desc,
             user: userPointer,
-            image:p.image
+            image:p.img,
+            like:0,
+            favor:0
+        }).save()
+    },
+
+    testpostStatus : async req => {
+        let p = req.params
+        // let userPointer = Parse.User.createWithoutData(req.user.id)
+        let publish = new Publish()
+        return await publish.set({
+            title: p.title,
+            desc: p.desc,
+            // user: userPointer,
+            image:p.oosArr,
         }).save()
     },
 
     getStatus: async req => {
-        let p = req.params
-        let r = await new Parse.Query('Publish').include('user').find()
-        return r.map(x => x._toFullJSON())
+        let skipnumber = req.params.number
+        if(skipnumber==null)
+        skipnumber = 0
+        console.log('grggrfdf'+skipnumber)
+        let user = Parse.User.createWithoutData(req.user.id)
+        let followingList = await new Parse.Query('Following').equalTo('user',user).find()
+        let followinguserList = followingList.map( x=>{
+            y = x._toFullJSON()
+            return y.following
+        })
+        let r = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").skip(skipnumber).limit(10).find()
+        let q=  await new Parse.Query('Publish').containedIn('user',followinguserList).descending("createdAt").skip(skipnumber).limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]  
+            y.redfavor = favor[index]
+            return y
+        })
+    
     },
 
+    getStatushot:async req =>{
+        let skipnumber = req.params.number
+        if(skipnumber==null)
+        skipnumber = 0
+        let r = await new Parse.Query('Publish').include('user').skip(skipnumber).limit(10).descending("like").descending("createdAt").find()
+        let q=  await new Parse.Query('Publish').descending("like").descending("createdAt").skip(skipnumber).limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]  
+            y.redfavor = favor[index]
+            return y
+        })
+
+    },
+    getStatusme:async req =>{
+        let skipnumber = req.params.number
+        if(skipnumber==null)
+        skipnumber = 0
+        console.log('aaretatfd'+typeof(skipnumber))
+        let user = Parse.User.createWithoutData(req.user.id)
+        let r = await new Parse.Query('Publish').equalTo('user',user).include('user').skip(skipnumber).limit(10).descending("createdAt").find()
+        let q=  await new Parse.Query('Publish').equalTo('user',user).descending("createdAt").skip(skipnumber).limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]
+            y.redfavor = favor[index]  
+            return y
+        })
+
+    },
     getStatusDetail: async req => {
         let p = req.params
-        console.log(p.id + 1111)
+        console.log('jgkhkgkgg'+p.id + '1111')
         let r = await new Parse.Query('Publish').include('user').get(p.id)
-        console.log(r)
+        // r.image = "http://tedacar.oss-us-east-1.aliyuncs.com/" +r.image
+        console.log('ooooooo'+JSON.stringify(r))
         return r._toFullJSON()
     }
+
 
 
 

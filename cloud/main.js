@@ -1,4 +1,5 @@
-
+const q = require('../tools/request')
+// let Parse = require('parse/node')
 
 // 导入子模块的文件
 let magentoRestful = require('./magentoRestful')
@@ -9,6 +10,7 @@ let social = require('./social')
 let wechat = require('./wechat')
 let yuansferPay = require('./yuansferPay')
 let aliyun = require('./aliyun')
+let myInfo = require('./myInfo')
 
 // const axios = require('axios')
 let uploadCar = require('./uploadCar')
@@ -46,7 +48,11 @@ for (x in uploadCar) {
     Parse.Cloud.define(x, uploadCar[x])          //引入uploadCar
 }
 for (x in firebase) {
-    Parse.Cloud.define(x, firebase[x]);
+    Parse.Cloud.define(x, firebase[x])
+}
+
+for (x in myInfo) {
+    Parse.Cloud.define(x, myInfo[x])
 }
 
 
@@ -70,14 +76,6 @@ Parse.Cloud.define('changeLang', async req => {
     console.log('改变全局变量之后')
     console.log(global.lang)
 })
-
-Parse.Cloud.define('upload', async req => {
-    // 修改全局变量，用来控制请求的后台语言
-    //global.lang = req.params.lang
-    // console.log('改变全局变量之后'  )
-    // console.log(global.lang)
-})
-
 
 
 
