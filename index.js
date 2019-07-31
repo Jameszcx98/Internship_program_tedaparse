@@ -18,6 +18,7 @@ let ParseDashboard = require('parse-dashboard'); // 控制面板
 let AppName = 'Teda'  // 新客户的名字
 let MASTER_KEY = 'dldl349jf4jfidj23ifj34jlgj4igi4g4g'
 let SERVER_URL = 'http://localhost:1337/parse'
+// let SERVER_URL = 'https://teda-parse.wudizu.com/parse'
 
 var dashboard = new ParseDashboard({
   "apps": [
