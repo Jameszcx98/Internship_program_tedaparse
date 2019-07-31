@@ -11,19 +11,21 @@ let UserInfo = Parse.Object.extend('UserInfo')
 module.exports = {
     userInfo: async req=>{//查询用户帖子获赞数量
         let user = Parse.User.createWithoutData(req.user.id)
-        let likefollownumber = await new Parse.Query('UserInfo').equalTo('user',user).find()
+        let number = await new Parse.Query('UserInfo').equalTo('user',user).find()
         let userInfo = await new Parse.Query('User').get(req.user.id)
-        if(likefollownumber.length==0){
+        if(number.length==0){
             let y =userInfo._toFullJSON()
             y.likenumber = 0
+            y.favornumber = 0
             y.follower = 0
             y.following =0
             return y
         }else{
             let y =userInfo._toFullJSON()
-            y.likenumber = likefollownumber[0].get('like')
-            y.follower = likefollownumber[0].get('follower')
-            y.following = likefollownumber[0].get('following')
+            y.likenumber = number[0].get('like')
+            y.favornumber = number[0].get('favor')
+            y.follower = number[0].get('follower')
+            y.following = number[0].get('following')
             return y
 
         }
