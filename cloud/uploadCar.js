@@ -21,25 +21,12 @@ module.exports = {
         let timestamp=new Date(datestr.split(" ")).getTime();
         console.log("timestamp:",timestamp)
 
-
         let skuid = "sku-"+p.plate    //用牌照做sku 唯一的
 
         let name = p.plate
 
-        
         console.log("p.crashlevel type:",typeof(p.crash))
         console.log("p.superCharged:",p.superCharged)
-
-        let crashLevel = p.crash + 3
-        console.log(crashLevel)
-
-        let scratchLevel = p.appearance + 6
-        console.log(scratchLevel)
-
-        
-
-
-
 
         let carParams = {
             "product": { 
@@ -68,7 +55,7 @@ module.exports = {
                 //       "media_type": "image"
                 //     }
                 // ],
-                //下面三个字段先实验
+              
                 "custom_attributes": [
                     {
                       "attribute_code": "city",
@@ -88,11 +75,11 @@ module.exports = {
                     },
                     {
                         "attribute_code": "crashLevel",
-                        "value": crashLevel  //对齐后台crashLevel的value
+                        "value": p.crash+4  //对齐后台crashLevel的value
                     },
                     {
                         "attribute_code": "scratchLevel",
-                        "value": scratchLevel   //对齐后台scratchLevel的value
+                        "value": p.appearance+7   //对齐后台scratchLevel的value
                     },
                     {
                         "attribute_code": "burned",
