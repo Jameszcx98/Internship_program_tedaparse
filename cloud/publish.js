@@ -3,6 +3,8 @@ let Comment = Parse.Object.extend('Comment')
 let Question = Parse.Object.extend('Question')
 let Publish = Parse.Object.extend('Publish')
 let Review = Parse.Object.extend('Review')
+let Like = Parse.Object.extend('Like')
+let Favor = Parse.Object.extend('Favor')
 
 let OSS = require('ali-oss')
 let client = new OSS({
@@ -17,14 +19,24 @@ module.exports = {
         console.log('req' + JSON.stringify(req))
     },
 
-    addLike: async req => { // 为了防止用户重复点赞，可以使用一个表记录用户的最近的操作，如果已经点赞，就不显示。
-        let p = req.params
-        let target = p.targetName
-        let id = p.targetId
-        let targetPointer = Parse.Object.extend(target).createWithoutData(id)
-        return targetPointer.increment('like').save().then()
-    },
-
+    // addLike: async req => { // 为了防止用户重复点赞，可以使用一个表记录用户的最近的操作，如果已经点赞，就不显示。
+    //     let p = req.params
+    //     console.log('vgggg'+JSON.stringify(p))
+    //     let target = p.name
+    //     let id = p.id
+    //     let targetid= Parse.Object.extend(target).createWithoutData(id)
+    //     let userid = Parse.User.createWithoutData(req.user.id)
+    //     let like = new Like()
+    //     let r = await like.set({
+    //         Id:userid,
+    //         targetId:id,
+    //         targetName:target
+    //     }).save().then()
+    //     let targetlist = await Parse.Query(target)
+    //     .extend(target).increment('like').save().then()
+    //     return r
+    // },
+    
     postQuestion: async req => { // 
         let q = req.params
         let question = new Question()
@@ -155,6 +167,8 @@ module.exports = {
             desc: p.desc,
             user: userPointer,
             image:p.img,
+            like:0,
+            favor:0
         }).save()
     },
 
@@ -171,12 +185,167 @@ module.exports = {
     },
 
     getStatus: async req => {
-        let p = req.params
-        let r = await new Parse.Query('Publish').include('user').limit(10).descending("createdAt").find()
-        // Query.skip(10);
-        return r.map(x => x._toFullJSON())
+        let skipnumber = req.params.number
+        if(skipnumber==null){
+        skipnumber = 0
+        }
+        console.log('grggrfdf'+skipnumber)
+        let user = Parse.User.createWithoutData(req.user.id)
+        let followingList = await new Parse.Query('Following').equalTo('user',user).find()
+        let followinguserList = followingList.map( x=>{
+            y = x._toFullJSON()
+            return y.following
+        })
+        let maxlist = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").find()
+        console.log('dfassafd'+maxlist.length)
+        if(maxlist.length>skipnumber){
+        let r = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").skip(skipnumber).limit(10).find()
+        let q=  await new Parse.Query('Publish').containedIn('user',followinguserList).descending("createdAt").skip(skipnumber).limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]  
+            y.redfavor = favor[index]
+            return y
+        })
+    }else{
+        return;
+    }
+    
     },
 
+    getStatushot:async req =>{
+        let skipnumber = req.params.number
+        if(skipnumber==null){
+        skipnumber = 0
+        }
+        let maxlist = await new Parse.Query('Publish').include('user').descending("like").find()
+        if(maxlist.length>skipnumber){
+        let r = await new Parse.Query('Publish').include('user').skip(skipnumber).limit(10).descending("like").find()
+        let q=  await new Parse.Query('Publish').descending("like").skip(skipnumber).limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]  
+            y.redfavor = favor[index]
+            return y
+        })
+    }
+    else{
+        return;
+    }
+
+    },
+    getStatusme:async req =>{
+        let skipnumber = req.params.number
+        if(skipnumber==null){
+        skipnumber = 0
+        }
+        console.log('aaretatfd'+typeof(skipnumber))
+        let user = Parse.User.createWithoutData(req.user.id)
+        let maxlist = await new Parse.Query('Publish').equalTo('user',user).include('user').descending("createdAt").find()
+        if(maxlist.length>skipnumber){
+        let r = await new Parse.Query('Publish').equalTo('user',user).include('user').skip(skipnumber).limit(10).descending("createdAt").find()
+        let q=  await new Parse.Query('Publish').equalTo('user',user).descending("createdAt").skip(skipnumber).limit(10).find()
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return r.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]
+            y.redfavor = favor[index]  
+            return y
+        })
+    }else{
+        return;
+    }
+
+    },
     getStatusDetail: async req => {
         let p = req.params
         console.log('jgkhkgkgg'+p.id + '1111')

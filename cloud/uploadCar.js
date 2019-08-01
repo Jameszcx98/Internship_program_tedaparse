@@ -25,8 +25,22 @@ module.exports = {
         let skuid = "sku-"+p.plate    //用牌照做sku 唯一的
 
         let name = p.plate
+
         
-        console.log("p.crashlevel:",p.crash)
+        console.log("p.crashlevel type:",typeof(p.crash))
+        console.log("p.superCharged:",p.superCharged)
+
+        let crashLevel = p.crash + 3
+        console.log(crashLevel)
+
+        let scratchLevel = p.appearance + 6
+        console.log(scratchLevel)
+
+        
+
+
+
+
         let carParams = {
             "product": { 
                 "attribute_set_id": 4,
@@ -73,12 +87,12 @@ module.exports = {
                         "value": timestamp
                     },
                     {
-                        "attribute_code": "crashlevel",
-                        "value": p.crash+23      //对齐后台dropdown的value
+                        "attribute_code": "crashLevel",
+                        "value": crashLevel  //对齐后台crashLevel的value
                     },
                     {
-                        "attribute_code": "scratchlevel",
-                        "value": p.appearance+26    //对齐后台dropdown的value
+                        "attribute_code": "scratchLevel",
+                        "value": scratchLevel   //对齐后台scratchLevel的value
                     },
                     {
                         "attribute_code": "burned",
@@ -87,16 +101,22 @@ module.exports = {
                     {
                         "attribute_code": "soaked",
                         "value": p.soaked
+                    },
+                    {
+                        "attribute_code": "emission",
+                        "value": p.EmissionStandard+10   //对齐后台EmissionStandard的value
+                    },
+                    {
+                        "attribute_code": "superCharging",
+                        "value": p.superCharged
                     }
-
-
                   ]
 
             }
         }
         try{
         console.log("上传的汽车参数：", carParams)
-        console.log(typeof(p.date))
+        console.log("date type:",typeof(p.date))
         let response = await q.post('/products', carParams)
         // console.log("responseEEE:",response)
         // console.log("DDDDAte:",p.date)
@@ -111,21 +131,21 @@ module.exports = {
 
     },
 
-    showCarList: async req =>{
-        let attributelist = await q.get('/products/attribute-sets/4/attributes')
+    // showCarList: async req =>{
+    //     let attributelist = await q.get('/products/attribute-sets/4/attributes')
     
-        // console.log("attributelist:",attributelist)
-        //查询attribute_code == 'brand'的那个对象
-        let brandlistobj= attributelist.filter(function(item){
-            return item.attribute_code == "brand"; 
-        })
-        let brandlist = brandlistobj[0].options  
+    //     // console.log("attributelist:",attributelist)
+    //     //查询attribute_code == 'brand'的那个对象
+    //     let brandlistobj= attributelist.filter(function(item){
+    //         return item.attribute_code == "brand"; 
+    //     })
+    //     let brandlist = brandlistobj[0].options  
     
-        //console.log("brandlist:",brandlist)
-        brandlist.shift()
+    //     //console.log("brandlist:",brandlist)
+    //     brandlist.shift()
         
-        console.log("brandlist:",brandlist)
+    //     console.log("brandlist:",brandlist)
     
-        return brandlist  //brandlist是一个对象数组 形式如上       
-    }   
+    //     return brandlist  //brandlist是一个对象数组 形式如上       
+    // }   
 }

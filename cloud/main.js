@@ -10,6 +10,7 @@ let social = require('./social')
 let wechat = require('./wechat')
 let yuansferPay = require('./yuansferPay')
 let aliyun = require('./aliyun')
+let myInfo = require('./myInfo')
 
 // const axios = require('axios')
 let uploadCar = require('./uploadCar')
@@ -18,6 +19,8 @@ let uploadCar = require('./uploadCar')
 let afterSaveHook = require('./afterSaveHook')
 let beforeSaveHook = require('./beforeSaveHook')
 
+// 导入Firebase
+let firebase = require('./firebase')
 
 
 for (x in magentoGraphql) {
@@ -44,6 +47,13 @@ for (x in yuansferPay) {
 for (x in uploadCar) {                            
     Parse.Cloud.define(x, uploadCar[x])          //引入uploadCar
 }
+for (x in firebase) {
+    Parse.Cloud.define(x, firebase[x])
+}
+
+for (x in myInfo) {
+    Parse.Cloud.define(x, myInfo[x])
+}
 
 
 for( x in afterSaveHook){
@@ -55,6 +65,7 @@ for( x in beforeSaveHook){
 for( x in aliyun){
     Parse.Cloud.beforeSave(x, aliyun[x])
 }
+
 
 
 

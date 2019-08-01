@@ -11,11 +11,11 @@ function errorCreate(err) {
 
 // 创建一个 axios 实例
 const service = axios.create({
-  baseURL: 'https://teda.wudizu.com', 
+  baseURL: 'https://teda-magento.wudizu.com', 
   timeout: 1000 * 60,
   headers: {
     'content-type': 'application/json',// 默认值，
-    'Authorization': 'Bearer f7zfv82afewzmfzpioz0kmommp2er6tx'  //改成teda的token
+    'Authorization': 'Bearer u9kxjgz3j5saoch8ffy9xizbw99jzo8l'  //改成teda的token
   }
 })
 
