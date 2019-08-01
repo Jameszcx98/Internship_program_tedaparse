@@ -15,7 +15,7 @@ const service = axios.create({
   timeout: 1000 * 60,
   headers: {
     'content-type': 'application/json',// 默认值，
-    'Authorization': 'Bearer 133rrai47uel4htro1rk4nwcsf93ek6d'  //改成teda的token
+    'Authorization': 'Bearer zvpofk3dl0xmxq3ndrls3tj8dfndb4ua'  //改成teda的token
   }
 })
 
