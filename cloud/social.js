@@ -11,30 +11,26 @@ let Favor = Parse.Object.extend('Favor')
 
 module.exports = {
     follow: async req => { // 当别人关注我
-
-
-        
         let meId = req.user.id
         let followingId = req.params.id  // 我关注的id
-        if(meId!=followingId){
         let mePointer = Parse.User.createWithoutData(meId)
         let followingPointer = Parse.User.createWithoutData(followingId)
-
+        let precheck = await new Parse.Query('Following').equalTo('user',mePointer).equalTo('following',followingPointer).equalTo('status',true).find()
+        if(meId!=followingId&&precheck.length==0){
         let follower = new Follower()
         let following = new Following()
-
         let r = await Parse.Object.saveAll([ // 生成两个记录
             follower.set({
                 user: followingPointer,
-                follower: mePointer
+                follower: mePointer,
+                status:true
             }),
             following.set({
                 user: mePointer,
-                following: followingPointer
+                following: followingPointer,
+                status:true
             })
         ]).then()
-        
-
         let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
         let targetInfo = await new Parse.Query('UserInfo').equalTo('user',followingPointer).find()
         if(meInfo.length==0){
@@ -62,12 +58,33 @@ module.exports = {
         }else{
             targetInfo[0].increment('follower').save()
         }
-        return r
+        return followingId
         }else{
             return false
         }
-
-
+    },
+    
+    unfollow: async req=>{
+        let meId = req.user.id
+        let followingId = req.params.id  // 我关注的id
+        let mePointer = Parse.User.createWithoutData(meId)
+        let followingPointer = Parse.User.createWithoutData(followingId)
+        let followingDelte = await new Parse.Query('Following').equalTo('user',mePointer).equalTo('following',followingPointer).equalTo('status',true).find()
+        let followingPiont = Parse.Object.extend('Following').createWithoutData(followingDelte[0].id)
+        await followingPiont.set({
+            status:false
+        }).save().then()
+        let followerDelte = await new Parse.Query('Follower').equalTo('user',followingPointer).equalTo('follower',mePointer).equalTo('status',true).find()
+        let followerPiont = Parse.Object.extend('Follower').createWithoutData(followerDelte[0].id)
+        await followerPiont.set({
+            status:false
+        }).save().then()
+        let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
+        let targetInfo = await new Parse.Query('UserInfo').equalTo('user',followingPointer).find()
+        console.log('cvzounaiuf'+JSON.stringify(meInfo[0]))
+        meInfo[0].increment('following',-1).save()
+        targetInfo[0].increment('follower',-1).save()
+        return followingDelte[0]._toFullJSON()
     },
 
 
@@ -131,13 +148,14 @@ module.exports = {
         let targetname = req.params.name
         let targetPointer = Parse.Object.extend(targetname).createWithoutData(id)
         let userPointer = Parse.User.createWithoutData(req.user.id)
-        let check_doubleFavor = await new Parse.Query('Favor').equalTo('userId', userPointer).equalTo('targetId', targetPointer).find()
+        let check_doubleFavor = await new Parse.Query('Favor').equalTo('userId', userPointer).equalTo('targetId', targetPointer).equalTo('status',true).find()
         if (check_doubleFavor.length == 0) {
             let favor = new Favor()
             let r = await favor.set({
                 userId: userPointer,
                 targetId: targetPointer,
-                targetName: targetname
+                targetName: targetname,
+                status: true
             }).save().then()
             targetPointer.increment('favor').save()
             let userinfo = await new Parse.Query('UserInfo').equalTo('user', userPointer).find()
@@ -159,6 +177,26 @@ module.exports = {
             return q._toFullJSON()
         }
 
+    },
+
+    subFavor: async req=>{
+        let id = req.params.id
+        let targetname = req.params.name
+        let targetPointer = Parse.Object.extend(targetname).createWithoutData(id)
+        let userPointer = Parse.User.createWithoutData(req.user.id)
+        let favor = await new Parse.Query('Favor').equalTo('userId', userPointer).equalTo('targetId', targetPointer).equalTo('status',true).find()
+        let deletePointer = Parse.Object.extend('Favor').createWithoutData(favor[0].id)
+        await deletePointer.set({
+            status:false
+        }).save().then()
+        targetPointer.increment('favor',-1).save()
+        let userinfo = await new Parse.Query('UserInfo').equalTo('user', userPointer).find()
+        userinfoPointer = Parse.Object.extend('UserInfo').createWithoutData(userinfo[0].id)
+        userinfoPointer.increment('favor',-1).save()
+        let q = await new Parse.Query('Publish').get(id)
+        return q._toFullJSON()
+        },
+
     }
 
        
@@ -166,4 +204,4 @@ module.exports = {
 
 
 
-    }
+    
