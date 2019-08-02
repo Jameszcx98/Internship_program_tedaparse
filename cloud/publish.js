@@ -237,8 +237,6 @@ module.exports = {
             y.redfavor = favor[index]
             return y
         })
-    } else if(maxlist.length==0){
-        return false
     }else{
         return;
     }
@@ -290,9 +288,6 @@ module.exports = {
             y.redfavor = favor[index]
             return y
         })
-    }
-    else if(maxlist.length==0){
-        return false
     }else{
         return;
     }
@@ -344,8 +339,6 @@ module.exports = {
             y.redfavor = favor[index]  
             return y
         })
-    } else if(maxlist.length==0){
-        return false
     }else{
         return;
     }
