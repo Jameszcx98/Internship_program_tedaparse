@@ -191,16 +191,16 @@ module.exports = {
         }
         console.log('grggrfdf'+skipnumber)
         let user = Parse.User.createWithoutData(req.user.id)
-        let followingList = await new Parse.Query('Following').equalTo('user',user).find()
+        let followingList = await new Parse.Query('Following').equalTo('user',user).equalTo('status',true).find()
         let followinguserList = followingList.map( x=>{
             y = x._toFullJSON()
             return y.following
         })
         let maxlist = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").find()
         console.log('dfassafd'+maxlist.length)
-        if(maxlist.length>skipnumber){
+        if(maxlist.length>skipnumber){//判断是否表里剩余的动态
         let r = await new Parse.Query('Publish').containedIn('user',followinguserList).include('user').descending("createdAt").skip(skipnumber).limit(10).find()
-        let q=  await new Parse.Query('Publish').containedIn('user',followinguserList).descending("createdAt").skip(skipnumber).limit(10).find()
+        let q=  await new Parse.Query('Publish').containedIn('user',followinguserList).descending("createdAt").skip(skipnumber).limit(10).find() //是否已经点过赞
         let promises = q.map(x => {
             targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
             userId = Parse.User.createWithoutData(req.user.id)
@@ -216,10 +216,10 @@ module.exports = {
                 heart[i] = true
             }
         })
-        let favorPromises = q.map(x => {
+        let favorPromises = q.map(x => {//是否已经收藏
             targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
             userId = Parse.User.createWithoutData(req.user.id)
-            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).equalTo('status',true).find()
         })
         let favorCheckList =  await Promise.all( favorPromises ).then()
         let favor = []
@@ -237,6 +237,8 @@ module.exports = {
             y.redfavor = favor[index]
             return y
         })
+    } else if(maxlist.length==0){
+        return false
     }else{
         return;
     }
@@ -270,7 +272,7 @@ module.exports = {
         let favorPromises = q.map(x => {
             targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
             userId = Parse.User.createWithoutData(req.user.id)
-            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).equalTo('status',true).find()
         })
         let favorCheckList =  await Promise.all( favorPromises ).then()
         let favor = []
@@ -289,7 +291,9 @@ module.exports = {
             return y
         })
     }
-    else{
+    else if(maxlist.length==0){
+        return false
+    }else{
         return;
     }
 
@@ -299,7 +303,6 @@ module.exports = {
         if(skipnumber==null){
         skipnumber = 0
         }
-        console.log('aaretatfd'+typeof(skipnumber))
         let user = Parse.User.createWithoutData(req.user.id)
         let maxlist = await new Parse.Query('Publish').equalTo('user',user).include('user').descending("createdAt").find()
         if(maxlist.length>skipnumber){
@@ -323,7 +326,7 @@ module.exports = {
         let favorPromises = q.map(x => {
             targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
             userId = Parse.User.createWithoutData(req.user.id)
-            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).find()
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).equalTo('status',true).find()
         })
         let favorCheckList =  await Promise.all( favorPromises ).then()
         let favor = []
@@ -341,6 +344,8 @@ module.exports = {
             y.redfavor = favor[index]  
             return y
         })
+    } else if(maxlist.length==0){
+        return false
     }else{
         return;
     }
@@ -348,12 +353,23 @@ module.exports = {
     },
     getStatusDetail: async req => {
         let p = req.params
-        console.log('jgkhkgkgg'+p.id + '1111')
+        let mePointer = Parse.User.createWithoutData(req.user.id)
         let r = await new Parse.Query('Publish').include('user').get(p.id)
-        // r.image = "http://tedacar.oss-us-east-1.aliyuncs.com/" +r.image
-        console.log('ooooooo'+JSON.stringify(r))
-        return r._toFullJSON()
-    }
+        let y = r._toFullJSON()
+        let targetPointer = Parse.User.createWithoutData(y.user.objectId)
+        console.log('111111111'+JSON.stringify(mePointer))
+        console.log('22222222222222'+JSON.stringify(targetPointer))
+        let followingList = await new Parse.Query('Following').equalTo('user',mePointer).equalTo('following',targetPointer).equalTo('status',true).find()
+
+        console.log('dfafaf'+JSON.stringify(followingList.length))
+        if(followingList.length ==0){
+            y.followSign = false
+        }else{
+            y.followSign = true
+        }
+        return y
+        
+    },
 
 
 
