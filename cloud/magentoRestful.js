@@ -1042,31 +1042,31 @@ module.exports = {
 
 
   
-  getFilteredProducts: async req => {
+  // getFilteredProducts: async req => {
 
-    let builder = new QueryBuilder();
-    builder.addFilterGroup([//and关系
-      {
-        field: "price",
-        value: 40,
-        condition:'gt'//大于
+  //   let builder = new QueryBuilder();
+  //   builder.addFilterGroup([//and关系
+  //     {
+  //       field: "price",
+  //       value: 40,
+  //       condition:'gt'//大于
 
-      }
+  //     }
      
-    ])
-    builder.addFilterGroup([
-      {
-        field: "price",
-        value: 51,
-        condition:'lt'//小于
-      }
-    ])
+  //   ])
+  //   builder.addFilterGroup([
+  //     {
+  //       field: "price",
+  //       value: 51,
+  //       condition:'lt'//小于
+  //     }
+  //   ])
 
-    let pageSize = 5//条目数
-    let currentPage = 1//当前页
-    let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&` + builder.getQuery()
-    return await q.get(url)
-  },
+  //   let pageSize = 5//条目数
+  //   let currentPage = 1//当前页
+  //   let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&` + builder.getQuery()
+  //   return await q.get(url)
+  // },
   getAttbutesLabel: async req => {
     return await q.get(`/products/attribute-sets/4/attributes`)
   },
