@@ -29,9 +29,105 @@ module.exports = {
             return y
 
         }
-
-       
-       
-
     },
+
+    getFavorList: async req=>{//查询用户收藏列表
+        let skipnumber = req.params.num
+        let user = Parse.User.createWithoutData(req.user.id)
+        let favorresult = await new Parse.Query('Favor').equalTo('userId',user).equalTo('status',true).find()
+        let favoridlist = favorresult.map( x=>{
+            y = x._toFullJSON()
+            return y.targetId.objectId
+        })
+        let maxlist = await new Parse.Query('Publish').containedIn('objectId',favoridlist).include('user').descending("createdAt").find()
+        if(maxlist.length>skipnumber){
+        let favorlist = await new Parse.Query('Publish').containedIn('objectId',favoridlist).include('user').descending("createdAt").skip(skipnumber).limit(10).find()
+        let q=  await new Parse.Query('Publish').containedIn('objectId',favoridlist).descending("createdAt").skip(skipnumber).limit(10).find() //是否已经点过赞
+        let promises = q.map(x => {
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Like').equalTo('userId',userId).equalTo('targetId',targetId).find()
+        })
+        let checkList =  await Promise.all( promises ).then()
+        let heart = []
+        checkList.map((x,i)=>{   
+            if(x.length==0){
+                heart[i] = false
+            }
+            else{
+                heart[i] = true
+            }
+        })
+        let favorPromises = q.map(x => {//是否已经收藏
+            targetId = Parse.Object.extend('Publish').createWithoutData(x.id)    
+            userId = Parse.User.createWithoutData(req.user.id)
+            return new Parse.Query('Favor').equalTo('userId',userId).equalTo('targetId',targetId).equalTo('status',true).find()
+        })
+        let favorCheckList =  await Promise.all( favorPromises ).then()
+        let favor = []
+        favorCheckList.map((x,i)=>{   
+            if(x.length==0){
+                favor[i] = false
+            }
+            else{
+                favor[i] = true
+            }
+        })
+        return favorlist.map( (x,index) => {
+            y = x._toFullJSON()
+            y.redheart = heart[index]  
+            y.redfavor = favor[index]
+            return y
+        })
+        
+        }else{
+            return;
+        }
+    },
+
+    getFollowerList: async req=>{//拿到粉丝列表
+        let user = Parse.User.createWithoutData(req.user.id)
+        let follower = await new Parse.Query('Follower').include('follower').equalTo('user',user).equalTo('status',true).find()
+        let followingStatus = await new Parse.Query('Following').equalTo('user',user).equalTo('status',true).find()
+        let followerList = follower.map( x=>{
+            let y = x._toFullJSON()
+            return y
+        })
+        let followingId = followingStatus.map(x=>{
+            let y = x._toFullJSON()
+            return y.following.objectId
+        })
+        let o=0
+        for(let key in followingId){
+            console.log('dgadrg111111'+followingId[o])
+            o++
+        }
+        let followerId = followerList.map(x=>{
+            return x.follower.objectId
+        })
+        let p=0
+        for(let key in followerId){
+            console.log('dgadrg'+followerId[p])
+            p++
+        }
+        followerId.map((x,index)=>{
+            if(followingId.indexOf(x)>=0){
+                followerList[index].status = true
+            }else{
+                console.log('dgsg'+followingId.indexOf(x))
+                followerList[index].status = false
+            }
+        })
+        return followerList.map(x=>x)
+        
+    },
+
+    getFollowingList: async req=>{//拿到关注列表
+        let user = Parse.User.createWithoutData(req.user.id)
+        let followingList = await new Parse.Query('Following').include('following').equalTo('user',user).equalTo('status',true).find()
+        return followingList.map(x=>x._toFullJSON())
+
+    }
+    
+    
 }
