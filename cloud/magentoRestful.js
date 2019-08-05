@@ -37,14 +37,15 @@ module.exports = {
   
   getMyCarlist: async req =>{   // Get specific car infos this user uploaded
 
-    let p = req.param
+    //let p = req.param
     // let thisUserId = p.userId
+
     console.log("ppppp:",p)
 
 
     let pageSize = 100      //条目数
     let currentPage = 1       //当前页
-    //let userid = 00001
+    let userid = 00001
     let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&`
     let items = await q.get(url)
     let carList = items.items
@@ -58,7 +59,7 @@ module.exports = {
     console.log("cusArr:",cusAttr[0])
     for(let item of cusAttr){
       for(let i of item){
-        if(i.attribute_code == 'userid' && i.value == thisUserId){
+        if(i.attribute_code == 'userid' && i.value == userId){
           resarr.push(item)
         }
       }
