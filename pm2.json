@@ -14,15 +14,14 @@
       //   "MASTER_KEY": "MASTER_KEY"
       // }
     }
-    // ,
-    // {
-    //   "name"   : "parse-dashboard",
-    //   "script" : "/usr/bin/parse-dashboard",
-    //   "watch"   : true,
-    //   "merge_logs"  : true,
-    //   "cwd"      : "/www/wwwroot/dashboard.billax.com.au/",
-    //   "args"     : "--config /www/wwwroot/dashboard.billax.com.au/dash.json --allowInsecureHTTP=1"
-    // }
+    ,
+    {
+      "name"   : "webhook",
+      "script" : "/home/parse/webhook.js",
+      "watch"   : true,
+      "merge_logs"  : true,
+      "cwd"      : "/home/parse"
+    }
   ]
 }
 
