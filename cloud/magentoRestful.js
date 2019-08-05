@@ -40,7 +40,7 @@ module.exports = {
     //let p = req.param
     // let thisUserId = p.userId
 
-    console.log("ppppp:",p)
+    //console.log("ppppp:",p)
 
 
     let pageSize = 100      //条目数
@@ -56,10 +56,12 @@ module.exports = {
 
     let resarr = []
     let returnarr = []
+
+
     console.log("cusArr:",cusAttr[0])
     for(let item of cusAttr){
       for(let i of item){
-        if(i.attribute_code == 'userid' && i.value == userId){
+        if(i.attribute_code == 'userid' && i.value == userid){
           resarr.push(item)
         }
       }
