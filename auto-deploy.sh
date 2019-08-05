@@ -1,4 +1,4 @@
 #!/bin/sh
-git pull origin master  
+git pull a master  
 npm install
-pm2 restart webhook.js
+pm2 restart all
