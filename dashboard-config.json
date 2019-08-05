@@ -1,11 +1,20 @@
 {
   "apps": [
     {
+      "serverURL": "http://localhost:1337/parse",
+      "appId": "Teda",
+      "masterKey": "dldl349jf4jfidj23ifj34jlgj4igi4g4g",
+      "appName": "Teda-local"
+     },
+     {
       "serverURL": "https://teda-parse.wudizu.com/parse",
       "appId": "Teda",
       "masterKey": "dldl349jf4jfidj23ifj34jlgj4igi4g4g",
-      "appName": "Teda"
+      "appName": "Teda-online"
      }
     
   ]
+  
 }
+
+
