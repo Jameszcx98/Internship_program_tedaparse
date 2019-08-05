@@ -34,6 +34,71 @@ module.exports = {
     let id = req.params.id;
     return await q.get('/categories/' + id + '/products').then();
   },
+  
+  getMyCarlist: async req =>{   // Get specific car infos this user uploaded
+
+    //let p = req.param
+    // let thisUserId = p.userId
+
+    //console.log("ppppp:",p)
+
+
+    let pageSize = 100      //条目数
+    let currentPage = 1       //当前页
+    let userid = 00001
+    let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&`
+    let items = await q.get(url)
+    let carList = items.items
+    console.log("items:",carList)
+    let cusAttr = items.items.map(x => {
+      return x.custom_attributes
+    })
+
+    let resarr = []
+    let returnarr = []
+
+
+    console.log("cusArr:",cusAttr[0])
+    for(let item of cusAttr){
+      for(let i of item){
+        if(i.attribute_code == 'userid' && i.value == userid){
+          resarr.push(item)
+        }
+      }
+    }
+
+    function getValue(arr,label) {
+      var filterArray = arr.filter(function(v) {
+          return v.attribute_code === label
+      })
+      if (filterArray.length) {
+          return filterArray[0].value
+      }
+    }
+
+    //const findLabel = (arr, value) => arr.find(obj => obj.value === value).attribute_code
+
+    for(let res of resarr){
+      let plate = getValue(res,'plate')
+      let city = getValue(res,'city')
+      console.log("plate:",plate)
+      let parameter = {
+        name:plate,
+        desc:city
+      }
+      returnarr.push(parameter)
+    }
+
+
+    console.log("returnarr:",returnarr)
+
+    return returnarr
+
+    //console.log("resarr:",resarr)
+    
+
+  },
+
   getFilteredProducts: async req => {
       // console.log('8888888'+JSON.stringify(req.params));
     let pageSize;//条目数

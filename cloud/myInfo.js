@@ -7,6 +7,7 @@ let Publish = Parse.Object.extend('Publish')
 let Review = Parse.Object.extend('Review')
 let Like = Parse.Object.extend('Like')
 let UserInfo = Parse.Object.extend('UserInfo')
+let News = Parse.Object.extend('News')
 
 module.exports = {
     userInfo: async req=>{//查询用户帖子获赞数量
@@ -97,24 +98,13 @@ module.exports = {
             let y = x._toFullJSON()
             return y.following.objectId
         })
-        let o=0
-        for(let key in followingId){
-            console.log('dgadrg111111'+followingId[o])
-            o++
-        }
         let followerId = followerList.map(x=>{
             return x.follower.objectId
         })
-        let p=0
-        for(let key in followerId){
-            console.log('dgadrg'+followerId[p])
-            p++
-        }
         followerId.map((x,index)=>{
             if(followingId.indexOf(x)>=0){
                 followerList[index].status = true
             }else{
-                console.log('dgsg'+followingId.indexOf(x))
                 followerList[index].status = false
             }
         })
@@ -127,7 +117,21 @@ module.exports = {
         let followingList = await new Parse.Query('Following').include('following').equalTo('user',user).equalTo('status',true).find()
         return followingList.map(x=>x._toFullJSON())
 
-    }
+    },
     
-    
+    getNews: async req=>{//拿到消息列表
+
+        let skipnumber = req.params.number
+        let user = Parse.User.createWithoutData(req.user.id)
+        let newsListLocal = await new Parse.Query('News').equalTo('user',user).descending('createdAt').include('targetuserPointer').include('eventPointer').skip(skipnumber).limit(10).find()
+        let newsList = await new Parse.Query('News').equalTo('user',user).descending('createdAt').include('targetuserPointer').include('eventPointer').skip(skipnumber).limit(10).find()
+        let promises = newsList.map(x=>{
+            return  x.set({
+                status:false
+            }).save()
+        })
+        await Promise.all( promises ).then()
+        return newsListLocal.map(x=>x._toFullJSON())
+
+},
 }
