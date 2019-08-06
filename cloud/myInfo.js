@@ -86,6 +86,20 @@ module.exports = {
         }
     },
 
+    addSubscription:  async req =>{
+        let query = await new Parse.Query('Publish')
+        let subscription = await query.subscribe()
+        subscription.on('open', () => {
+            console.log('subscription opened!we23rq2ewar32231312!!!!!!!!!!!!!!')
+        })
+        subscription.on('update', (Follower) => {
+            console.log('object updated');
+        });
+        // subscription.on('create', (object) => {
+        //     console.log('object created');
+        //   });
+    },
+
     getFollowerList: async req=>{//拿到粉丝列表
         let user = Parse.User.createWithoutData(req.user.id)
         let follower = await new Parse.Query('Follower').include('follower').equalTo('user',user).equalTo('status',true).find()
