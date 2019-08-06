@@ -101,11 +101,27 @@ module.exports = {
 
   getFilteredProducts: async req => {
       // console.log('8888888'+JSON.stringify(req.params));
-      
+    let pageSize;//条目数
+    let currentPage;//当前页
+    if(!!req.params.pageSize){
+      pageSize=req.params.pageSize
+    }else{
+      pageSize=5
+    }
+    if(!!req.params.currentPage){
+      currentPage=req.params.currentPage
+    }else{
+      currentPage=1
+    }
     let builder = new QueryBuilder();
-    req.params.choose2.forEach(a=> 
-       builder.addFilterGroup(a.options)
-    );
+    if(!!req.params.choose2){
+      req.params.choose2.forEach(a=> 
+        builder.addFilterGroup(a.options)
+     );
+    }
+    // req.params.pageSize?req.params.pageSize:5
+    // req.params.currentPage?req.params.currentPage:1
+    console.log('hhhh'+JSON.stringify(req.params))
     // console.log('gggggg'+console.log(aaa))
     // return;
     // builder.addFilterGroup([//and关系
@@ -124,9 +140,9 @@ module.exports = {
     //     condition:'lt'//小于
     //   }
     // ])
-
-    let pageSize = 2//条目数
-    let currentPage = 1//当前页
+    // if(){}
+    
+  
     let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&` + builder.getQuery()
     return await q.get(url)
   },
