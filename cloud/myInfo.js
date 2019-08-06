@@ -12,8 +12,21 @@ let News = Parse.Object.extend('News')
 module.exports = {
     userInfo: async req=>{//查询用户帖子获赞数量
         let user = Parse.User.createWithoutData(req.user.id)
-        let number = await new Parse.Query('UserInfo').equalTo('user',user).find()
-        
+        let number = await new Parse.Query('UserInfo').include('user').find()
+        let query = new Parse.Query('UserInfo')
+        let subscription = query.subscribe()
+        subscription.on('update',(object)=>{
+            number.map( x=>{
+                if(x.id ===object.id){
+                    let y =userInfo._toFullJSON()
+                    y.likenumber = number[0].get('like')
+                    y.favornumber = number[0].get('favor')
+                    y.follower = number[0].get('follower')
+                    y.following = number[0].get('following')
+                    return y
+                }
+            })
+        })
         let userInfo = await new Parse.Query('User').get(req.user.id)
         if(number.length==0){
             let y =userInfo._toFullJSON()
@@ -24,8 +37,6 @@ module.exports = {
             return y
         }else{
             let y =userInfo._toFullJSON()
-            
-              
             y.likenumber = number[0].get('like')
             y.favornumber = number[0].get('favor')
             y.follower = number[0].get('follower')
