@@ -97,7 +97,19 @@ module.exports = {
         return followingDelte[0]._toFullJSON()
     },
 
-
+    addSubscription:  async req =>{
+        let query = await new Parse.Query('')
+        let subscription = await query.subscribe()
+        subscription.on('open', () => {
+            console.log('subscription opened!we23rq2ewar32231312!!!!!!!!!!!!!!')
+        })
+        subscription.on('update', (Follower) => {
+            console.log('object updated');
+        });
+        // subscription.on('create', (object) => {
+        //     console.log('object created');
+        //   });
+    },
 
 
 
@@ -163,6 +175,8 @@ module.exports = {
         return q._toFullJSON()        
     
         },
+
+    
 
     addFavor: async req=>{
         let id = req.params.id

@@ -14,6 +14,7 @@ module.exports = {
         let user = Parse.User.createWithoutData(req.user.id)
         let number = await new Parse.Query('UserInfo').equalTo('user',user).find()
         let userInfo = await new Parse.Query('User').get(req.user.id)
+
         if(number.length==0){
             let y =userInfo._toFullJSON()
             y.likenumber = 0
@@ -30,6 +31,23 @@ module.exports = {
             return y
 
         }
+    },
+
+    addSubscription: async req =>{
+        let query = new Parse.Query('UserInfo')
+        let subscription = await query.subscribe()
+        subscription.on('open', () => {
+            console.log('subscription opened')
+        })
+
+        subscription.on('create', (object) => {
+            console.log('object created')
+        })
+
+        subscription.on('update', (object) => {
+            console.log('object updated:'+JSON.stringify(object))
+        })
+
     },
 
     getFavorList: async req=>{//查询用户收藏列表
@@ -86,19 +104,7 @@ module.exports = {
         }
     },
 
-    addSubscription:  async req =>{
-        let query = await new Parse.Query('Publish')
-        let subscription = await query.subscribe()
-        subscription.on('open', () => {
-            console.log('subscription opened!we23rq2ewar32231312!!!!!!!!!!!!!!')
-        })
-        subscription.on('update', (Follower) => {
-            console.log('object updated');
-        });
-        // subscription.on('create', (object) => {
-        //     console.log('object created');
-        //   });
-    },
+   
 
     getFollowerList: async req=>{//拿到粉丝列表
         let user = Parse.User.createWithoutData(req.user.id)
