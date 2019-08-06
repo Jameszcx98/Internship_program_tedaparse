@@ -12,7 +12,7 @@ let News = Parse.Object.extend('News')
 module.exports = {
     userInfo: async req=>{//查询用户帖子获赞数量
         let user = Parse.User.createWithoutData(req.user.id)
-        let number = await new Parse.Query('UserInfo').equalTo('user',user).find()
+        let number = await new Parse.Query('UserInfo').include('user').equalTo('user',user).find()
         let userInfo = await new Parse.Query('User').get(req.user.id)
 
         if(number.length==0){
