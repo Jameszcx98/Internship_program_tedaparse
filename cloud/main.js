@@ -23,6 +23,8 @@ let beforeSaveHook = require('./beforeSaveHook')
 let firebase = require('./firebase')
 
 
+
+
 for (x in magentoGraphql) {
     Parse.Cloud.define(x, magentoGraphql[x])
 }
@@ -55,7 +57,6 @@ for (x in myInfo) {
     Parse.Cloud.define(x, myInfo[x])
 }
 
-
 for( x in afterSaveHook){
     Parse.Cloud.afterSave(x, afterSaveHook[x])
 }
@@ -65,6 +66,7 @@ for( x in beforeSaveHook){
 for( x in aliyun){
     Parse.Cloud.beforeSave(x, aliyun[x])
 }
+
 
 
 
