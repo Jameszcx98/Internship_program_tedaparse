@@ -6,18 +6,23 @@ require("firebase/firestore")
 
 // Init conversation live query class
 let Conversations = Parse.Object.extend('Conversations');
+let Message = Parse.Object.extend('Message')
+
 
 
 module.exports = {
     getChatList : async req =>{
-        let r = await new Parse.Query('Message').find()
+
+        let hostId = 'b7n8SBW7gg'   //先写死看看
+        let oppId = 'WyyKaMWhab'
+
+        let r = await new Parse.Query(Message).equalTo('to',oppId).find()
         console.log("rrrr:",r)
-        return r
 
 
 
 
-
+        return r    
 
     },
 
@@ -42,11 +47,28 @@ module.exports = {
     },
 
     addMessage : async req => {    // Input: message, conversation id, sender
-        let msg = req.params.message;
-        let conversationId = req.params.conversationId;
-        let sdr = req.params.sender;
+        let p = req.params
+        console.log("ppp:",p)
 
-        console.log('sdr:',sdr)
+        let toIdPointer = Parse.Object.extend('User').createWithoutData(p.to)
+        let fromIdPointer = Parse.Object.extend('User').createWithoutData(p.from)
+       
+        // let msg = req.params.message;
+        // let conversationId = req.params.conversationId;
+        // let sdr = req.params.sender;
+        console.log("p.to",p.to)
+        let message = new Message()
+        await message.set({
+            to:toIdPointer,
+            from:fromIdPointer,
+            text:p.message          
+        }).save()
+
+        return "Message added.";
+
+       // console.log('sdr:',sdr)
+
+
         
 
         //let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
@@ -67,7 +89,7 @@ module.exports = {
         //     console.log("Error adding message: ", e);
         // })
 
-        return "Message added.";
+        
     },
 
     getMessage: async req => {
