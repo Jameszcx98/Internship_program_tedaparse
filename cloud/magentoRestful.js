@@ -36,20 +36,16 @@ module.exports = {
   },
   
   getMyCarlist: async req =>{   // Get specific car infos this user uploaded
-
-    //let p = req.param
-    // let thisUserId = p.userId
-
-    //console.log("ppppp:",p)
-
-
     let pageSize = 100      //条目数
     let currentPage = 1       //当前页
     let userid = 00001
     let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&`
     let items = await q.get(url)
+    console.log("items:",items)
     let carList = items.items
-    // console.log("items:",carList)
+
+    //console.log("items:",carList)
+
     let cusAttr = items.items.map(x => {
       return x.custom_attributes
     })
@@ -58,7 +54,7 @@ module.exports = {
     let returnarr = []
 
 
-    console.log("cusArr:",cusAttr[0])
+    //console.log("cusArr:",cusAttr[0])
     for(let item of cusAttr){
       for(let i of item){
         if(i.attribute_code == 'userid' && i.value == userid){
@@ -141,9 +137,6 @@ module.exports = {
     //     condition:'lt'//小于
     //   }
     // ])
-    // if(){}
-    
-  
     let url = `/products?searchCriteria[page_size]=${pageSize}&searchCriteria[current_page]=${currentPage}&` + builder.getQuery()
     return await q.get(url)
   },
@@ -159,6 +152,7 @@ module.exports = {
     let url='categories/attributes?searchCriteria[page_size]=5&searchCriteria[current_page]=1'
     return await q.get(url)
   },
+  
   products: async req => {    // Get the detail info of products under the category
     let sku = req.params.sku
     return await q.get('/products/' + sku)
