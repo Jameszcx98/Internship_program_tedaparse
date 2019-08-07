@@ -95,14 +95,14 @@ module.exports = {
 
   },
 
-  getFilteredProducts: async req => {
+  getFilteredProducts: async req => {//筛选
       // console.log('8888888'+JSON.stringify(req.params));
     let pageSize;//条目数
     let currentPage;//当前页
     if(!!req.params.pageSize){
       pageSize=req.params.pageSize
     }else{
-      pageSize=5
+      pageSize=20
     }
     if(!!req.params.currentPage){
       currentPage=req.params.currentPage
@@ -115,9 +115,10 @@ module.exports = {
         builder.addFilterGroup(a.options)
      );
     }
+    // console.log('dskkdjsk'+currentPage)
     // req.params.pageSize?req.params.pageSize:5
     // req.params.currentPage?req.params.currentPage:1
-    console.log('hhhh'+JSON.stringify(req.params))
+    // console.log('hhhh'+JSON.stringify(req.params))
     // console.log('gggggg'+console.log(aaa))
     // return;
     // builder.addFilterGroup([//and关系
