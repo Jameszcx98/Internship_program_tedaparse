@@ -14,13 +14,14 @@ module.exports = {
         let user = Parse.User.createWithoutData(req.user.id)
         let number = await new Parse.Query('UserInfo').include('user').equalTo('user',user).find()
         let userInfo = await new Parse.Query('User').get(req.user.id)
-
+        let newsNumber = await new Parse.Query('News').equalTo('user',user).equalTo('status',true).descending('createdAt').find()
         if(number.length==0){
             let y =userInfo._toFullJSON()
             y.likenumber = 0
             y.favornumber = 0
             y.follower = 0
             y.following =0
+            y.number = 0
             return y
         }else{
             let y =userInfo._toFullJSON()
@@ -28,6 +29,7 @@ module.exports = {
             y.favornumber = number[0].get('favor')
             y.follower = number[0].get('follower')
             y.following = number[0].get('following')
+            y.number = newsNumber[0].get('number')
             return y
 
         }
