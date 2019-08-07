@@ -44,7 +44,7 @@ var api = new ParseServer({
   masterKey: process.env.MASTER_KEY || MASTER_KEY, //Add your master key here. Keep it secret!
   serverURL: process.env.SERVER_URL || SERVER_URL,  // Don't forget to change to https if needed
   liveQuery: {
-    classNames: ["Conversations","UserInfo"] // List of classes to support for query subscriptions
+    classNames: ["Conversations","UserInfo","Message"] // List of classes to support for query subscriptions
   }
 });
 

@@ -9,6 +9,19 @@ let Conversations = Parse.Object.extend('Conversations');
 
 
 module.exports = {
+    getChatList : async req =>{
+        let r = await new Parse.Query('Message').find()
+        console.log("rrrr:",r)
+        return r
+
+
+
+
+
+
+    },
+
+
     createConversation : async req => {    // Input: user1, user2
         let user1 = req.params.user1;
         let user2 = req.params.user2;
@@ -32,25 +45,27 @@ module.exports = {
         let msg = req.params.message;
         let conversationId = req.params.conversationId;
         let sdr = req.params.sender;
+
+        console.log('sdr:',sdr)
         
 
-        let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
+        //let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
 
-        let getMessage = convoRef.get().then( doc => {
-            let messageList = doc.data().messages;
-            messageList.push({
-                time : Date(Date.now()).toString(),
-                sender : sdr,
-                message : msg
-            });
-            // console.log("New messages list: ", messageList);
+        // let getMessage = convoRef.get().then( doc => {
+        //     let messageList = doc.data().messages;
+        //     messageList.push({
+        //         time : Date(Date.now()).toString(),
+        //         sender : sdr,
+        //         message : msg
+        //     });
+        //     // console.log("New messages list: ", messageList);
 
-            // Set the new messageList
-            let updateSingle = convoRef.update({messages: messageList});
-        })
-        .catch( e => {
-            console.log("Error adding message: ", e);
-        })
+        //     // Set the new messageList
+        //     let updateSingle = convoRef.update({messages: messageList});
+        //})
+        // .catch( e => {
+        //     console.log("Error adding message: ", e);
+        // })
 
         return "Message added.";
     },
