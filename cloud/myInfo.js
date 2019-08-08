@@ -9,6 +9,7 @@ let Like = Parse.Object.extend('Like')
 let UserInfo = Parse.Object.extend('UserInfo')
 let News = Parse.Object.extend('News')
 
+
 module.exports = {
     userInfo: async req=>{//查询用户帖子获赞数量
         let user = Parse.User.createWithoutData(req.user.id)
