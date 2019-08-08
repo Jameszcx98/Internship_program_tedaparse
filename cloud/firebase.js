@@ -114,6 +114,33 @@ module.exports = {
         let messages = await new Parse.Query(Message).find()
         messages = messages.map(x => x._toFullJSON())
         console.log("messages:",messages)
+        console.log("00000",messages[0].to.objectId)
+        let thisMsgList = messages.map(x =>{
+            if((x.to.objectId === hostId) || (x.from.objectId === hostId) ){
+                return x
+            }
+        })
+        console.log("thisMsgList:",thisMsgList)
+
+        // {
+        //     sender:xxx,
+        //     time:xxx,
+        //     message:xcasx,
+        // }
+
+        thisMsgList = thisMsgList.map(x=>{
+            let tempObj = {
+                sender:x.from.objectId,
+                time:x.createdAt,
+                message:x.text
+            }
+            return tempObj
+        })
+        console.log("thisMsgList222222:",thisMsgList)
+
+        return thisMsgList
+
+
 
         //let messages = new Parse.Query
 
