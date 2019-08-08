@@ -95,68 +95,81 @@ module.exports = {
     },
 
     getMessage: async req => {
-        let conversationId = req.params.conversationId;
 
-        let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
+        console.log("running get conversation...")
+        let hostId = 'b7n8SBW7gg'   //先写死看看  zzy
+        let oppId = 'WyyKaMWhab'  //zcx
 
-        try {
-            let message = await convoRef.get().then()
+        let messages = await new Parse.Query(Message).find()
+        messages = messages.map(x => x._toFullJSON())
+        console.log("messages:",messages)
 
-            let messageList = message.data().messages;
-            console.log("All messages: ", messageList);
+        //let messages = new Parse.Query
+
+
+
+        // let conversationId = req.params.conversationId;
+
+        // let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
+
+        // try {
+        //     let message = await convoRef.get().then()
+
+        //     let messageList = message.data().messages;
+        //     console.log("All messages: ", messageList);
             
 
-            return messageList;
+        //     return messageList;
 
-        } catch (e) {
-            return e;
-        }    
+        // } catch (e) {
+        //     return e;
+        // }    
     },
 
-    keepTracking: async req => {    // Will be activated once new message added to firebase
-        Parse.LiveQuery.on('open', () => {
+    // keepTracking: async req => {    // Will be activated once new message added to firebase
+    //     Parse.LiveQuery.on('open', () => {
 
-        });        
+    //     });        
 
-        let conversationId = req.params.conversationId;
+    //     let conversationId = req.params.conversationId;
 
-        let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
+    //     let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
 
-        try {
+    //     try {
 
-            /////////////////////////////////////////////
-            let observer = convoRef.onSnapshot(docSnapshot => {
+    //         /////////////////////////////////////////////
+    //         let observer = convoRef.onSnapshot(docSnapshot => {
 
-                // console.log("Updated messages: ", docSnapshot);
-                console.log("Yes!!!!!!!!!!!");
+    //             // console.log("Updated messages: ", docSnapshot);
+    //             console.log("Yes!!!!!!!!!!!");
 
 
-                convoRef.get().then( r => {
-                    let messageList = r.data().messages;
-                    console.log("Live messages: ", messageList);
+    //             convoRef.get().then( r => {
+    //                 let messageList = r.data().messages;
+    //                 console.log("Live messages: ", messageList);
 
-                    // Save to live query
-                    let conversation = new Conversations();
+    //                 // Save to live query
+    //                 let conversation = new Conversations();
                     
-                    conversation.set({'msglist' : messageList}).save().then( r => {
-                        console.log('Save to query: ',r);
-                    }).catch( e => {
-                        console.log('Save to query error: ', e);
-                    });
+    //                 conversation.set({'msglist' : messageList}).save().then( r => {
+    //                     console.log('Save to query: ',r);
+    //                 }).catch( e => {
+    //                     console.log('Save to query error: ', e);
+    //                 });
                     
-                }).catch( e => {console.log(e)});
+    //             }).catch( e => {console.log(e)});
 
 
-            }, err => {
-               console.log(`Encountered error: ${err}`);
-            });
-            /////////////////////////////////////////////
+    //         }, err => {
+    //            console.log(`Encountered error: ${err}`);
+    //         });
+    //         /////////////////////////////////////////////
  
-            return "Return!!!";
+    //         return "Return!!!";
 
-        } catch (e) {
-            return e;
-        }    
-    },
+    //     } catch (e) {
+    //         return e;
+    //     }    
+    // },
 
 }
