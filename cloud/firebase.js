@@ -10,8 +10,11 @@ let Message = Parse.Object.extend('Message')
 
 module.exports = {
     getChatList : async req =>{
+        let skipnumber = req.params.number
         let user = Parse.User.createWithoutData(req.user.id)
-        let chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').find()
+        let maxList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').find()
+        if(maxList.length>skipnumber){
+        let chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').skip(skipnumber).limit(10).find()
         let promises = chatList.map( x=>{
             let targetPoint = x.get('friend')
             // console.log('fafafd'+JSON.stringify(targetPoint))
@@ -27,6 +30,9 @@ module.exports = {
             }
             return y
         })
+    }else{
+        return;
+    }
  
 
     },
