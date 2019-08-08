@@ -18,7 +18,7 @@ module.exports = {
         let mePointer = Parse.User.createWithoutData(meId)
         let followingPointer = Parse.User.createWithoutData(followingId)
         let precheck = await new Parse.Query('Following').equalTo('user',mePointer).equalTo('following',followingPointer).equalTo('status',true).find()//检查是否已经关注
-        let newsnumber = await new Parse.Query('News').equalTo('user',meId).equalTo('status',true).find()
+        let newsnumber = await new Parse.Query('News').equalTo('user',followingPointer).equalTo('status',true).find()
         if(meId!=followingId&&precheck.length==0){
         let follower = new Follower()
         let following = new Following()
@@ -141,7 +141,7 @@ module.exports = {
         let userPointer = Parse.User.createWithoutData(req.user.id)//我的id
         let targetlike = await new Parse.Query('Publish').get(id)
         let targetuseridPionter= targetlike.get('user')//我点赞的对象
-        let newsnumber = await new Parse.Query('News').equalTo('user',userPointer).equalTo('status',true).find()
+        let newsnumber = await new Parse.Query('News').equalTo('user',targetuseridPionter).equalTo('status',true).find()
         let like = new Like()
         let r = await Parse.Object.saveAll([
             like.set({
