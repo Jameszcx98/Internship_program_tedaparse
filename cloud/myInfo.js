@@ -14,7 +14,7 @@ module.exports = {
         let user = Parse.User.createWithoutData(req.user.id)
         let number = await new Parse.Query('UserInfo').include('user').equalTo('user',user).find()
         let userInfo = await new Parse.Query('User').get(req.user.id)
-        let newsNumber = await new Parse.Query('News').equalTo('user',user).equalTo('status',true).descending('createdAt').find()
+        let newsNumber = await new Parse.Query('News').equalTo('user',user).descending('createdAt').find()
         if(number.length==0){
             let y =userInfo._toFullJSON()
             y.likenumber = 0
@@ -149,7 +149,8 @@ module.exports = {
         let newsList = await new Parse.Query('News').equalTo('user',user).descending('createdAt').include('targetuserPointer').include('eventPointer').skip(skipnumber).limit(10).find()
         let promises = newsList.map(x=>{
             return  x.set({
-                status:false
+                status:false,
+                number:0
             }).save()
         })
         await Promise.all( promises ).then()
