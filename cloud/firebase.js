@@ -8,45 +8,50 @@ require("firebase/firestore")
 let Conversations = Parse.Object.extend('Conversations');
 let Message = Parse.Object.extend('Message')
 
-
-
 module.exports = {
     getChatList : async req =>{
-
-        let hostId = 'b7n8SBW7gg'   //先写死看看
-        let oppId = 'WyyKaMWhab'
-
-        let r = await new Parse.Query(Message).equalTo('to',oppId).find()
-        console.log("rrrr:",r)
-
-
-
-
-        return r    
+        let user = Parse.User.createWithoutData(req.user.id)
+        let chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').find()
+        let promises = chatList.map( x=>{
+            let targetPoint = x.get('friend')
+            // console.log('fafafd'+JSON.stringify(targetPoint))
+            return new Parse.Query('Message').equalTo('from',user).equalTo('to',targetPoint).descending('createdAt').limit(1).find()
+        })
+        let chatDetail = await Promise.all(promises).then()
+        return chatList.map((x,index)=>{
+            let y = x._toFullJSON()
+            if(chatDetail[index].length>0){
+            y.chatcontent = chatDetail[index][0].get('text')
+            }else{
+                y.chatcontent = null
+            }
+            return y
+        })
+ 
 
     },
 
 
-    createConversation : async req => {    // Input: user1, user2
-        let user1 = req.params.user1;
-        let user2 = req.params.user2;
+    // createConversation : async req => {    // Input: user1, user2
+    //     let user1 = req.params.user1;
+    //     let user2 = req.params.user2;
 
-        console.log("crreating")
+    //     console.log("crreating")
 
-        //var convoRef = firebase.firestore().collection('conversations');
+    //     //var convoRef = firebase.firestore().collection('conversations');
 
-        // Add new conversation to the database and return conversation id
-        try {
-            let r =  await convoRef.add({
-                users: [user1, user2],
-                messages: [],
-            })
-            return r.id;
+    //     // Add new conversation to the database and return conversation id
+    //     try {
+    //         let r =  await convoRef.add({
+    //             users: [user1, user2],
+    //             messages: [],
+    //         })
+    //         return r.id;
 
-        } catch (e) {
-            return e;
-        }
-    },
+    //     } catch (e) {
+    //         return e;
+    //     }
+    // },
 
     addMessage : async req => {    // Input: message, conversation id, sender
         let p = req.params

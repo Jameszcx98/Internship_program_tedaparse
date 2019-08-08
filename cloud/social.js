@@ -9,6 +9,7 @@ let Like = Parse.Object.extend('Like')
 let UserInfo = Parse.Object.extend('UserInfo')
 let Favor = Parse.Object.extend('Favor')
 let News = Parse.Object.extend('News')
+let Conversation = Parse.Object.extend('Conversation')
 
 module.exports = {
     follow: async req => { // 当别人关注我
@@ -22,6 +23,7 @@ module.exports = {
         if(meId!=followingId&&precheck.length==0){
         let follower = new Follower()
         let following = new Following()
+        let conversation = new Conversation()
         let r = await Parse.Object.saveAll([ // 生成三个记录
             follower.set({
                 user: followingPointer,
@@ -40,6 +42,13 @@ module.exports = {
                 "targetName":'follower',
                 "status":true,
                 'number':newsnumber.length+1
+
+            }),
+            conversation.set({
+                user: mePointer,
+                friend: followingPointer,
+                chatFrequence: 0,
+                status:true
 
             })
         ]).then()
@@ -89,6 +98,10 @@ module.exports = {
         let followerDelte = await new Parse.Query('Follower').equalTo('user',followingPointer).equalTo('follower',mePointer).equalTo('status',true).find()
         let followerPiont = Parse.Object.extend('Follower').createWithoutData(followerDelte[0].id)
         await followerPiont.set({
+            status:false
+        }).save().then()
+        let conversationDelte = await new Parse.Query('Conversation').equalTo('user',mePointer).equalTo('friend',followingPointer).equalTo('status',true).find()
+        await conversationDelte[0].set({
             status:false
         }).save().then()
         let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
