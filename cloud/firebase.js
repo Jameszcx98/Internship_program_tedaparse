@@ -55,15 +55,18 @@ module.exports = {
 
     addMessage : async req => {    // Input: message, conversation id, sender
         let p = req.params
-        console.log("ppp:",p)
+        console.log("ppp:",p.to)
 
         let toIdPointer = Parse.Object.extend('User').createWithoutData(p.to)
-        let fromIdPointer = Parse.Object.extend('User').createWithoutData(p.from)
+        let fromIdPointer = Parse.Object.extend('User').createWithoutData(req.user.id)
        
         // let msg = req.params.message;
         // let conversationId = req.params.conversationId;
         // let sdr = req.params.sender;
         console.log("p.to",p.to)
+        console.log("fromis::",req.user.id)
+
+
         let message = new Message()
         await message.set({
             to:toIdPointer,
@@ -98,19 +101,29 @@ module.exports = {
 
         
     },
+    getMyId: async req =>{
+        console.log("getmyiddddd",req.user.id)
+
+        return req.user.id
+
+    },
+
 
     getMessage: async req => {
 
         console.log("running get conversation...")
-        let hostId = 'b7n8SBW7gg'   //先写死看看  zzy
-        let oppId = 'WyyKaMWhab'  //zcx
+        let hostId = req.user.id  
+        let oppId = req.params.oppId  // opposite id
+
+        console.log("oppIUd:::",oppId)
 
         let messages = await new Parse.Query(Message).find()
         messages = messages.map(x => x._toFullJSON())
         console.log("messages:",messages)
         console.log("00000",messages[0].to.objectId)
-        let thisMsgList = messages.map(x =>{
-            if((x.to.objectId === hostId) || (x.from.objectId === hostId) ){
+
+        let thisMsgList = messages.map(x =>{     //判断对话双方是否为这两个人
+            if(((x.to.objectId === hostId)&&(x.from.objectId === oppId) )||((x.from.objectId === hostId)&&(x.to.objectId === oppId))){
                 return x
             }
         })
