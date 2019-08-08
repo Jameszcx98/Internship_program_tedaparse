@@ -31,7 +31,9 @@ module.exports = {
         let user1 = req.params.user1;
         let user2 = req.params.user2;
 
-        var convoRef = firebase.firestore().collection('conversations');
+        console.log("crreating")
+
+        //var convoRef = firebase.firestore().collection('conversations');
 
         // Add new conversation to the database and return conversation id
         try {

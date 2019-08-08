@@ -118,10 +118,7 @@ module.exports = {
 
     },
 
-    getChatList : async req =>{
-        let r = await new Parse.Query('Message').find()
-        console.log("rrrr:",r)
-    },
+   
 
     // showCarList: async req =>{
     //     let attributelist = await q.get('/products/attribute-sets/4/attributes')
