@@ -12,7 +12,7 @@ module.exports = {
         let user = Parse.User.createWithoutData(req.user.id)     //当前用户
         
         
-        let maxList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).find()
+        let maxList = await new Parse.Query('Conversation').equalTo('user',user).find()
         let chatList =[]
         if(maxList.length>skipnumber){
             if(p.method === 0){
