@@ -99,9 +99,9 @@ module.exports = {
             'desc': p.desc,
             'ifFather': !!p.commentId ? false : true,
             'targetId': p.targetId,
-            'title': p.title || '',
-            'comment': !!p.commentId ? Parse.Object.extend('Comment').createWithoutData(p.commentId): undefined
-
+            // 'title': p.title || '',
+            'comment': !!p.commentId ? Parse.Object.extend('Comment').createWithoutData(p.commentId): undefined,
+            commentImg:p.img
         }).save()
 
         return r
