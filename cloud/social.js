@@ -50,8 +50,17 @@ module.exports = {
                 chatFrequence: 0,
                 status:true
 
-            })
+            }),
         ]).then()
+        // let followerConversation = await new Parse.Query('Conversation').equalTo('user',followingPointer).equalTo('friend',mePointer).find()
+        // if(followerConversation.length ==0){
+        //     await conversation.set({
+        //         user: followingPointer,
+        //         friend: mePointer,
+        //         chatFrequence: 0,
+        //         status:true
+        //     }).save()
+        // }
         let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
         let targetInfo = await new Parse.Query('UserInfo').equalTo('user',followingPointer).find()
         if(meInfo.length==0){
@@ -67,7 +76,7 @@ module.exports = {
         }else {
             meInfo[0].increment('following').save()
         }
-        if(targetInfo == 0){
+        if(targetInfo.length == 0){
             let newInfo = new UserInfo()
             await newInfo.set({
                 user:followingPointer,
@@ -101,7 +110,7 @@ module.exports = {
             status:false
         }).save().then()
         let conversationDelte = await new Parse.Query('Conversation').equalTo('user',mePointer).equalTo('friend',followingPointer).equalTo('status',true).find()
-        await conversationDelte[0].set({
+        await conversationDelte[0].set({//聊天框消失
             status:false
         }).save().then()
         let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()

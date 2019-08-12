@@ -168,7 +168,8 @@ module.exports = {
             user: userPointer,
             image:p.img,
             like:0,
-            favor:0
+            favor:0,
+            isDisabling:true
         }).save()
     },
 

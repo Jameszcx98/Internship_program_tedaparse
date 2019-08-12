@@ -12,12 +12,11 @@ module.exports = {
     getChatList : async req =>{
         let skipnumber = req.params.number
         let user = Parse.User.createWithoutData(req.user.id)
-        let maxList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').find()
+        let maxList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).find()
         if(maxList.length>skipnumber){
         let chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').skip(skipnumber).limit(10).find()
         let promises = chatList.map( x=>{
             let targetPoint = x.get('friend')
-            // console.log('fafafd'+JSON.stringify(targetPoint))
             return new Parse.Query('Message').equalTo('from',user).equalTo('to',targetPoint).descending('createdAt').limit(1).find()
         })
         let chatDetail = await Promise.all(promises).then()
@@ -60,53 +59,24 @@ module.exports = {
     // },
 
     addMessage : async req => {    // Input: message, conversation id, sender
-        let p = req.params
-        console.log("ppp:",p.to)
-
-        let toIdPointer = Parse.Object.extend('User').createWithoutData(p.to)
-        let fromIdPointer = Parse.Object.extend('User').createWithoutData(req.user.id)
-       
-        // let msg = req.params.message;
-        // let conversationId = req.params.conversationId;
-        // let sdr = req.params.sender;
-        console.log("p.to",p.to)
-        console.log("fromis::",req.user.id)
-
-
+        let toPointer = Parse.Object.extend('User').createWithoutData(req.params.to)
+        let fromPointer = Parse.Object.extend('User').createWithoutData(req.user.id)
+        let conversationStatusUser = await new Parse.Query('Conversation').equalTo('user',fromPointer).equalTo('friend',toPointer).find()
+        conversationStatusUser[0].increment('chatFrequence').save()
+        let conversationStatusFriend =await new  Parse.Query('Conversation').equalTo('user',toPointer).equalTo('friend',fromPointer).find()
+        conversationStatusFriend[0].increment('chatFrequence').save()
         let message = new Message()
         await message.set({
-            to:toIdPointer,
-            from:fromIdPointer,
-            text:p.message          
+            from:fromPointer,
+            to:toPointer,
+            text:req.params.message          
         }).save()
-
-        return "Message added.";
-
-       // console.log('sdr:',sdr)
-
-
-        
-
-        //let convoRef = firebase.firestore().collection('conversations').doc(conversationId);
-
-        // let getMessage = convoRef.get().then( doc => {
-        //     let messageList = doc.data().messages;
-        //     messageList.push({
-        //         time : Date(Date.now()).toString(),
-        //         sender : sdr,
-        //         message : msg
-        //     });
-        //     // console.log("New messages list: ", messageList);
-
-        //     // Set the new messageList
-        //     let updateSingle = convoRef.update({messages: messageList});
-        //})
-        // .catch( e => {
-        //     console.log("Error adding message: ", e);
-        // })
-
-        
+        return "Message added.";  
     },
+
+
+
+
     getMyId: async req =>{
         console.log("getmyiddddd",req.user.id)
 
@@ -116,42 +86,23 @@ module.exports = {
 
 
     getMessage: async req => {
-
-        console.log("running get conversation...")
-        let hostId = req.user.id  
-        let oppId = req.params.oppId  // opposite id
-
-        console.log("oppIUd:::",oppId)
-
-        let messages = await new Parse.Query(Message).find()
-        messages = messages.map(x => x._toFullJSON())
-        console.log("messages:",messages)
-        console.log("00000",messages[0].to.objectId)
-
-        let thisMsgList = messages.map(x =>{     //判断对话双方是否为这两个人
-            if(((x.to.objectId === hostId)&&(x.from.objectId === oppId) )||((x.from.objectId === hostId)&&(x.to.objectId === oppId))){
-                return x
-            }
+        let skipnumber = req.params.number
+        let fromPoint = Parse.User.createWithoutData(req.user.id) //我的ID
+        let toPoint = Parse.User.createWithoutData(req.params.oppId)  // opposite id
+        let chaterList = [fromPoint,toPoint]
+        let maxList = await new Parse.Query("Message").containedIn('from',chaterList).containedIn('to',chaterList).find()
+        if(maxList.length>skipnumber){
+        let messagesList = await new Parse.Query("Message").containedIn('from',chaterList).containedIn('to',chaterList).include('from').include('to').descending('createdAt').skip(skipnumber).limit(10).find()
+        let jsonList = messagesList.map(x=>{
+            let y =x._toFullJSON()
+            y.userId = req.user.id
+            return y
         })
-        console.log("thisMsgList:",thisMsgList)
-
-        // {
-        //     sender:xxx,
-        //     time:xxx,
-        //     message:xcasx,
-        // }
-
-        thisMsgList = thisMsgList.map(x=>{
-            let tempObj = {
-                sender:x.from.objectId,
-                time:x.createdAt,
-                message:x.text
-            }
-            return tempObj
-        })
-        console.log("thisMsgList222222:",thisMsgList)
-
-        return thisMsgList
+        return jsonList.reverse()
+    }else{
+        let userId = [[req.user.id]]
+        return userId
+    }
 
 
 
