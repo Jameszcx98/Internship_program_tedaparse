@@ -10,28 +10,40 @@ let Message = Parse.Object.extend('Message')
 
 module.exports = {
     getChatList : async req =>{
+        let p = req.params
+        console.log("pppp:",p)
+        console.log("pMethod;",p.method)  //method==0 我关注的    method==1 陌生人
+
         let skipnumber = req.params.number
-        let user = Parse.User.createWithoutData(req.user.id)
+        let user = Parse.User.createWithoutData(req.user.id)     //当前用户
+        
+        
         let maxList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).find()
+        let chatList =[]
         if(maxList.length>skipnumber){
-        let chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').skip(skipnumber).limit(10).find()
-        let promises = chatList.map( x=>{
-            let targetPoint = x.get('friend')
-            return new Parse.Query('Message').equalTo('from',user).equalTo('to',targetPoint).descending('createdAt').limit(1).find()
-        })
-        let chatDetail = await Promise.all(promises).then()
-        return chatList.map((x,index)=>{
-            let y = x._toFullJSON()
-            if(chatDetail[index].length>0){
-            y.chatcontent = chatDetail[index][0].get('text')
-            }else{
-                y.chatcontent = null
+            if(p.method === 0){
+                    chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',true).include('friend').descending('updatedAt').skip(skipnumber).limit(10).find()
+            }else if(p.method === 1){
+                    chatList = await new Parse.Query('Conversation').equalTo('user',user).equalTo('status',false).include('friend').descending('updatedAt').skip(skipnumber).limit(10).find()
             }
-            return y
-        })
-    }else{
-        return;
-    }
+            
+            let promises = chatList.map( x=>{
+                let targetPoint = x.get('friend')
+                return new Parse.Query('Message').equalTo('from',user).equalTo('to',targetPoint).descending('createdAt').limit(1).find()
+            })
+            let chatDetail = await Promise.all(promises).then()
+            return chatList.map((x,index)=>{
+                let y = x._toFullJSON()
+                if(chatDetail[index].length>0){
+                y.chatcontent = chatDetail[index][0].get('text') 
+                }else{
+                    y.chatcontent = null
+                }
+                return y
+            })
+        }else{
+            return;
+        }
  
 
     },
