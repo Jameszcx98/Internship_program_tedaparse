@@ -44,24 +44,21 @@ module.exports = {
                 'number':newsnumber.length+1
 
             }),
-            conversation.set({
+        ]).then()
+        let followerConversation = await new Parse.Query('Conversation').equalTo('user',mePointer).equalTo('friend',followingPointer).find()//查找是否之前关注过
+        if(followerConversation.length ==0){//第一次关注
+            await conversation.set({
                 user: mePointer,
                 friend: followingPointer,
                 chatFrequence: 0,
                 status:true
-
-            }),
-        ]).then()
-        // let followerConversation = await new Parse.Query('Conversation').equalTo('user',followingPointer).equalTo('friend',mePointer).find()
-        // if(followerConversation.length ==0){
-        //     await conversation.set({
-        //         user: followingPointer,
-        //         friend: mePointer,
-        //         chatFrequence: 0,
-        //         status:true
-        //     }).save()
-        // }
-        let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
+            }).save()
+        }else{//之前关注过但取关了
+            await followerConversation[0].set({
+                status:true
+            }).save()
+        }
+        let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()//userInfo的相关操作
         let targetInfo = await new Parse.Query('UserInfo').equalTo('user',followingPointer).find()
         if(meInfo.length==0){
             let newInfo = new UserInfo()
@@ -115,7 +112,7 @@ module.exports = {
         }).save().then()
         let meInfo = await new Parse.Query('UserInfo').equalTo('user',mePointer).find()
         let targetInfo = await new Parse.Query('UserInfo').equalTo('user',followingPointer).find()
-        console.log('cvzounaiuf'+JSON.stringify(meInfo[0]))
+        // console.log('cvzounaiuf'+JSON.stringify(meInfo[0]))
         meInfo[0].increment('following',-1).save()
         targetInfo[0].increment('follower',-1).save()
         return followingDelte[0]._toFullJSON()

@@ -40,7 +40,7 @@ module.exports = {
         let user = Parse.User.createWithoutData(req.params.id)
         let number = await new Parse.Query('UserInfo').include('user').equalTo('user',user).find()
         let userInfo = await new Parse.Query('User').get(req.params.id)
-        let newsNumber = await new Parse.Query('News').equalTo('user',user).descending('createdAt').find()
+        // let newsNumber = await new Parse.Query('News').equalTo('user',user).descending('createdAt').find()
         if(number.length==0){
             let y =userInfo._toFullJSON()
             y.likenumber = 0
@@ -135,7 +135,7 @@ module.exports = {
    
 
     getFollowerList: async req=>{//拿到粉丝列表
-        let user = Parse.User.createWithoutData(req.user.id)
+        let user = Parse.User.createWithoutData(req.params.id)
         let follower = await new Parse.Query('Follower').include('follower').equalTo('user',user).equalTo('status',true).find()
         let followingStatus = await new Parse.Query('Following').equalTo('user',user).equalTo('status',true).find()
         let followerList = follower.map( x=>{
@@ -161,7 +161,7 @@ module.exports = {
     },
 
     getFollowingList: async req=>{//拿到关注列表
-        let user = Parse.User.createWithoutData(req.user.id)
+        let user = Parse.User.createWithoutData(req.params.id)
         let followingList = await new Parse.Query('Following').include('following').equalTo('user',user).equalTo('status',true).find()
         return followingList.map(x=>x._toFullJSON())
 
