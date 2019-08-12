@@ -23,7 +23,8 @@ module.exports = {
             
             let promises = chatList.map( x=>{
                 let targetPoint = x.get('friend')
-                return new Parse.Query('Message').equalTo('from',user).equalTo('to',targetPoint).descending('createdAt').limit(1).find()
+                let chaterList = [user,targetPoint]
+                return new Parse.Query('Message').containedIn('from',chaterList).containedIn('to',chaterList).descending('createdAt').limit(1).find()
             })
             let chatDetail = await Promise.all(promises).then()
             return chatList.map((x,index)=>{
