@@ -162,23 +162,23 @@ module.exports = {
     console.log('req' + JSON.stringify(req))
 
     // 创建一个Magento 账户，unionId 被加盐存起来了
-    let userId = req.user.id
-    let unionId = req.params.unionId
+    // let userId = req.user.id
+    let unionId = req.params.openId
     let wxProfile = req.params.wxProfile
-
-    console.log(unionId)
+    // console.log('99999'+JSON.stringify(wxProfile))
+    // console.log(unionId)
 
     let password = uuidv4()
 
-    let isEmailOk = await q.post('/customers/isEmailAvailable', {
-      customerEmail: `${unionId}@qq.com`
-    }).then()
+    // let isEmailOk = await q.post('/customers/isEmailAvailable', {
+    //   customerEmail: `${unionId}@qq.com`
+    // }).then()
 
-    console.log('isEmailOk' + JSON.stringify(isEmailOk))
+    // console.log('isEmailOk' + JSON.stringify(isEmailOk))
 
-    if (!isEmailOk) {
-      return
-    }
+    // if (!isEmailOk) {
+    //   return
+    // }
 
     if (unionId) {
       let r = await q({
