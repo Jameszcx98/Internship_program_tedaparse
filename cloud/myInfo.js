@@ -30,7 +30,7 @@ module.exports = {
             y.favornumber = number[0].get('favor')
             y.follower = number[0].get('follower')
             y.following = number[0].get('following')
-            // y.number = newsNumber[0].get('number')
+            y.number = newsNumber[0].get('number')
             return y
 
         }
